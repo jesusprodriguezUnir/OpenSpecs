@@ -14,6 +14,9 @@ export default defineConfig({
 			locales: {
 				root: { label: 'Español', lang: 'es-ES' },
 			},
+			components: {
+				PageTitle: "./src/components/overrides/PageTitle.astro",
+			},
 			customCss: ['./src/styles/custom.css'],
 			sidebar: [
 				{ label: 'Empieza', items: [{ autogenerate: { directory: 'empieza' } }] },

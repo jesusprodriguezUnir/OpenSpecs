@@ -1,0 +1,91 @@
+---
+import Default from '@astrojs/starlight/components/PageTitle.astro';
+import { hasMetadataHeader } from '../../lib/content-rules';
+import { getBuildDate, isStale } from '../../lib/staleness';
+
+const { entry } = Astro.locals.starlightRoute;
+const { level, duration, openspecVersion, lastReviewed } = entry.data;
+const showHeader = hasMetadataHeader(entry.id);
+const stale = showHeader && lastReviewed !== undefined && isStale(lastReviewed, getBuildDate());
+const reviewedLabel = lastReviewed
+	? new Intl.DateTimeFormat('es-ES', { dateStyle: 'long', timeZone: 'UTC' }).format(lastReviewed)
+	: undefined;
+const levelLabel = level ? level.charAt(0).toUpperCase() + level.slice(1) : undefined;
+---
+
+<Default />
+{
+	showHeader && (
+		<dl class="guide-meta" data-guide-meta>
+			{levelLabel && (
+				<div data-meta="level">
+					<dt>Nivel</dt>
+					<dd>{levelLabel}</dd>
+				</div>
+			)}
+			{duration !== undefined && (
+				<div data-meta="duration">
+					<dt>Duración</dt>
+					<dd>{duration} min</dd>
+				</div>
+			)}
+			{openspecVersion && (
+				<div data-meta="openspec-version">
+					<dt>OpenSpec</dt>
+					<dd>{openspecVersion}</dd>
+				</div>
+			)}
+			{reviewedLabel && lastReviewed && (
+				<div data-meta="last-reviewed">
+					<dt>Revisado</dt>
+					<dd>
+						<time datetime={lastReviewed.toISOString().slice(0, 10)}>{reviewedLabel}</time>
+					</dd>
+				</div>
+			)}
+		</dl>
+	)
+}
+{
+	stale && (
+		<aside
+			aria-label="Precaución"
+			class="starlight-aside starlight-aside--caution"
+			data-stale-warning
+		>
+			<p class="starlight-aside__title" aria-hidden="true">
+				Precaución
+			</p>
+			<div class="starlight-aside__content">
+				<p>
+					Contenido posiblemente desactualizado: esta página se revisó hace más de 180 días y
+					puede no reflejar la versión actual de OpenSpec.
+				</p>
+			</div>
+		</aside>
+	)
+}
+
+<style>
+	.guide-meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem 1.5rem;
+		margin-top: 0.75rem;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+	}
+	.guide-meta div {
+		display: flex;
+		gap: 0.375rem;
+	}
+	.guide-meta dt {
+		font-weight: 600;
+	}
+	.guide-meta dt::after {
+		content: ':';
+	}
+	.guide-meta dd {
+		margin: 0;
+	}
+</style>

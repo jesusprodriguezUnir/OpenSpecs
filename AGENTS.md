@@ -29,7 +29,7 @@ Documentación de proyecto (léela cuando el change lo requiera, no entera en ca
 
 ## Convenciones
 - Cero JS de cliente por defecto; cualquier isla se justifica en `design.md`.
-- Overrides de Starlight solo en `src/components/overrides/` (Head, Hero, Footer como máximo).
+- Overrides de Starlight solo en `src/components/overrides/` (Head, Hero, Footer y PageTitle como máximo; PageTitle añade la cabecera de metadatos de las guías).
 - Imágenes en `src/assets/` con `<Image />`. Fuentes autoalojadas. Ningún tercero que ponga cookies.
 - Ejemplos de specs en la web con dominio neutro (gestión de reservas), sin datos personales.
 - No inventes comandos ni flags de OpenSpec: compruébalos con `openspec --help` / `openspec <cmd> --help`.
