@@ -16,8 +16,26 @@ Guía web en español para aprender a usar [OpenSpec](https://openspec.dev) desd
 | `npm run dev` | Servidor de desarrollo en `localhost:4321` |
 | `npm run build` | Build de producción en `./dist/` |
 | `npm run preview` | Sirve el build localmente |
-| `npx astro check` | Tipos y esquema de contenido |
+| `npm run check` | Tipos y esquema de contenido (`astro check`) |
+| `npm run test:unit` | Tests unitarios (Vitest) |
+| `npm run test:e2e` | Tests E2E y de accesibilidad (Playwright contra `astro preview`) |
+| `npm run test` | Unitarios y después E2E |
+| `npm run links` | Enlaces internos de `dist/` (requiere `npm run build` y lychee) |
 | `openspec validate --all --strict` | Valida specs y changes |
+
+## Comprobar enlaces
+
+`npm run links` usa [lychee](https://github.com/lycheeverse/lychee) en modo offline (solo enlaces internos y fragmentos). Instálalo una vez:
+
+```powershell
+winget install lycheeverse.lychee
+```
+
+```bash
+cargo install lychee   # o: brew install lychee
+```
+
+Sin lychee, `npm run links` falla con un mensaje claro y los tests de enlaces de `tests/unit/` se saltan en local (en CI siempre se ejecutan).
 
 ## Cómo se trabaja
 
