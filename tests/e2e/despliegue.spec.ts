@@ -60,7 +60,7 @@ test.describe('despliegue', () => {
 		});
 		await page.goto(`${PREVIEW_URL}/`);
 		await page.locator('site-search button[data-open-modal]').first().click();
-		await page.getByRole('searchbox').fill('OpenSpec');
+		await page.locator('site-search .pagefind-ui__search-input').fill('OpenSpec');
 		await expect(page.locator('.pagefind-ui__result').first()).toBeVisible();
 		expect(violations).toEqual([]);
 	});
