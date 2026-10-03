@@ -1,25 +1,28 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import { resolveSiteUrl } from './src/config/site.mjs';
 
 // https://astro.build/config
 export default defineConfig({
+	site: resolveSiteUrl(process.env),
 	integrations: [
 		starlight({
-			title: 'My Docs',
-			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withastro/starlight' }],
+			title: 'OpenSpec desde cero',
+			favicon: '/favicon.svg',
+			defaultLocale: 'root',
+			locales: {
+				root: { label: 'Español', lang: 'es-ES' },
+			},
+			customCss: ['./src/styles/custom.css'],
 			sidebar: [
-				{
-					label: 'Guides',
-					items: [
-						// Each item here is one entry in the navigation menu.
-						{ label: 'Example Guide', slug: 'guides/example' },
-					],
-				},
-				{
-					label: 'Reference',
-					items: [{ autogenerate: { directory: 'reference' } }],
-				},
+				{ label: 'Empieza', items: [{ autogenerate: { directory: 'empieza' } }] },
+				{ label: 'Guías', items: [{ autogenerate: { directory: 'guias' } }] },
+				{ label: 'Con tu agente', items: [{ autogenerate: { directory: 'agentes' } }] },
+				{ label: 'En equipo', items: [{ autogenerate: { directory: 'equipo' } }] },
+				{ label: 'Referencia', items: [{ autogenerate: { directory: 'referencia' } }] },
+				{ label: 'Recursos', items: [{ slug: 'recursos' }] },
+				{ label: 'Cómo se hizo', items: [{ slug: 'como-se-hizo' }] },
 			],
 		}),
 	],
