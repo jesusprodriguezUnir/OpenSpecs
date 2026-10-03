@@ -1,0 +1,44 @@
+# Puerta de calidad mínima. El change w02-calidad-ci la amplía (tests, enlaces, a11y).
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  OPENSPEC_VERSION: 1.14.0
+  OPENSPEC_TELEMETRY: '0'
+  ASTRO_TELEMETRY_DISABLED: '1'
+
+jobs:
+  openspec:
+    name: Validar specs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm i -g @fission-ai/openspec@${{ env.OPENSPEC_VERSION }}
+      - run: openspec validate --all --strict --no-interactive
+
+  build:
+    name: Check y build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx astro check
+      - run: npm run build

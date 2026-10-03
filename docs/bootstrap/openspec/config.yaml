@@ -1,0 +1,45 @@
+schema: spec-driven
+
+# Solo restricciones que el agente no puede inferir leyendo el código.
+# Stack y convenciones de código viven en CLAUDE.md (no duplicar aquí).
+context: |
+  Escribe todos los artefactos (proposal, design, tasks y el texto de las specs) en español de España.
+  Mantén en inglés las palabras normativas que reconoce el validador:
+  SHALL/MUST, GIVEN/WHEN/THEN/AND, ADDED/MODIFIED/REMOVED Requirements, Requirement:, Scenario:.
+
+  Producto: sitio web estático de documentación que enseña a usar OpenSpec desde cero.
+  El backlog es docs/proyecto/04-roadmap-de-changes.md; no hay Jira ni Azure DevOps.
+  Glosario del dominio del sitio:
+    - guía: página de contenido bajo /empieza, /guias, /agentes, /equipo o /referencia
+    - recorrido: secuencia recomendada de páginas (Inicio, Equipo, Consulta)
+    - recurso: enlace externo catalogado en la colección "resources"
+    - change archivado: carpeta en openspec/changes/archive/, mostrada en /como-se-hizo/
+  Dominios de spec permitidos: navegacion, contenido, seo, accesibilidad, busqueda,
+  calidad, despliegue, showcase, legal. Proponer uno nuevo exige justificarlo en proposal.md.
+
+rules:
+  proposal:
+    - 'Primera línea: "Roadmap: <NN> · docs/proyecto/04-roadmap-de-changes.md" o "Fuera de roadmap: <motivo>"'
+    - 'Sección explícita "Fuera de alcance"'
+    - 'Indicar si añade JavaScript de cliente, terceros o almacenamiento en el navegador (impacto LSSI-CE/RGPD)'
+    - 'Preguntas abiertas en una sección propia; no inventar respuestas'
+  specs:
+    - 'Solo comportamiento observable del sitio construido (HTML, cabeceras, URLs, resultado del build); nada de nombres de componentes internos'
+    - 'No especificar la calidad editorial del texto; sí su estructura verificable (frontmatter, enlaces, presencia en sidebar)'
+    - 'Un Scenario por regla y por caso límite o de error (p. ej. ruta inexistente, campo de frontmatter ausente)'
+  design:
+    - 'Justificar cualquier isla de cliente, override de Starlight o dependencia nueva, con alternativa descartada'
+    - 'Referenciar el ADR-0001 cuando se apliquen sus decisiones; si se contradice, proponer un ADR nuevo en docs/proyecto/'
+  tasks:
+    - 'Cada tarea que implementa un Scenario incluye su test (Playwright o Vitest) con "Scenario: <nombre>" en el título'
+    - 'Tarea final obligatoria: npm run build, npx astro check y openspec validate --all --strict en verde'
+
+operations:
+  apply:
+    guidance:
+      - 'Ejecuta npm run build tras cada bloque de tareas; no marques una tarea como hecha si el build falla'
+      - 'Resume los resultados de tests en pocas líneas'
+  archive:
+    guidance:
+      - 'Antes de archivar, confirma que el subagente spec-verifier no reporta escenarios sin cubrir'
+      - 'Resume qué specs principales se han creado o modificado'
