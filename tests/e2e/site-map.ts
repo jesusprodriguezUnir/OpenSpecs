@@ -1,0 +1,25 @@
+// Slugs del mapa del sitio v1 (docs/proyecto/03-arquitectura-de-informacion.md), sin landing ni legales.
+export const siteMapSlugs = [
+  "/empieza/que-es/",
+  "/empieza/conceptos/",
+  "/empieza/instalacion/",
+  "/empieza/primer-cambio/",
+  "/guias/formato-de-specs/",
+  "/guias/flujo-opsx/",
+  "/guias/recetas/",
+  "/guias/brownfield/",
+  "/guias/configuracion/",
+  "/agentes/claude-code/",
+  "/agentes/otros/",
+  "/equipo/jira/",
+  "/equipo/azure-devops/",
+  "/equipo/ci/",
+  "/equipo/adopcion/",
+  "/referencia/comandos-chat/",
+  "/referencia/cli/",
+  "/referencia/plantillas/",
+  "/referencia/glosario/",
+  "/referencia/faq/",
+  "/recursos/",
+  "/como-se-hizo/"
+];
