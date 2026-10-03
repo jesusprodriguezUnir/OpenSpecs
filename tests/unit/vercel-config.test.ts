@@ -13,7 +13,7 @@ type VercelConfig = {
 };
 
 const config: VercelConfig = JSON.parse(readFileSync('vercel.json', 'utf8'));
-const fixtureDist = resolve('tests/unit/fixtures/vercel/dist');
+const fixtureDist = resolve('tests/unit/fixtures/vercel/site');
 
 const headersFor = (source: string) =>
 	Object.fromEntries(
