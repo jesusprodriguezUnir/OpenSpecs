@@ -45,15 +45,15 @@ Un Scenario del tipo «un PR con X falla el job Y» no es reproducible dentro de
 **9. OpenSpec fijado a 1.14.0** vía `OPENSPEC_VERSION` (ya existe en el workflow); un test comprueba que no hay `latest` ni rango.
 
 ### Coste estimado por job
-Estimaciones, a sustituir por tiempos medidos en la primera ejecución en GitHub:
+Tiempos medidos en la primera ejecución en GitHub (jobs en paralelo; total de pared ~1 min):
 
-| Job | Qué evita | Coste aprox. |
+| Job | Qué evita | Coste medido (run #1, PR #2) |
 |---|---|---|
-| `openspec` | specs inválidas en `main` | < 1 min (instalar CLI + validar) |
-| `build` | errores de tipos/esquema/frontmatter | 1–2 min |
+| `openspec` | specs inválidas en `main` | ~15 s (instalar CLI + validar) |
+| `build` | errores de tipos/esquema/frontmatter | ~25 s |
 | `unit` | regresiones de lógica y de la propia puerta | < 1 min |
-| `e2e` | regresiones observables (nav, SEO, a11y) | 2–4 min (build + Chromium) |
-| `links` | enlaces internos rotos | < 1 min (reutiliza `dist/`) |
+| `e2e` | regresiones observables (nav, SEO, a11y) | ~50 s (build + Chromium) |
+| `links` | enlaces internos rotos | ~4 s (reutiliza `dist/`) |
 
 ## Risks / Trade-offs
 

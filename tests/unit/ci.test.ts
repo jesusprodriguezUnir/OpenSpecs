@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 
-const ci = readFileSync('.github/workflows/ci.yml', 'utf8');
+// Normalize CRLF: Windows checkouts may convert the workflow's line endings.
+const ci = readFileSync('.github/workflows/ci.yml', 'utf8').replace(/\r\n/g, '\n');
 const playwrightConfig = readFileSync('playwright.config.ts', 'utf8');
 
 /** Returns the text of one top-level job of the workflow. */
