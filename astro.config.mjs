@@ -17,6 +17,7 @@ export default defineConfig({
 			components: {
 				PageTitle: "./src/components/overrides/PageTitle.astro",
 			},
+			routeMiddleware: './src/route-middleware.ts',
 			customCss: ['./src/styles/custom.css'],
 			sidebar: [
 				{ label: 'Empieza', items: [{ autogenerate: { directory: 'empieza' } }] },

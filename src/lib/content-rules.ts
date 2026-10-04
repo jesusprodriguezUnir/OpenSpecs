@@ -1,7 +1,11 @@
 import { z } from 'astro/zod';
 
 /** Metadata fields that guide pages may be required to declare. */
-export type GuideField = 'openspecVersion' | 'lastReviewed' | 'level' | 'duration';
+export type GuideField = 'openspecVersion' | 'lastReviewed' | 'level' | 'duration' | 'description';
+
+/** Inclusive length bounds for `description` in guide and reference sections. */
+export const DESCRIPTION_MIN = 50;
+export const DESCRIPTION_MAX = 160;
 
 export const GUIDE_LEVELS = ['inicio', 'intermedio', 'avanzado'] as const;
 export type GuideLevel = (typeof GUIDE_LEVELS)[number];
@@ -29,8 +33,8 @@ function sectionOf(id: string): string {
 /** Fields that the page with the given collection id (e.g. `guias/recetas`) must declare. */
 export function requiredFieldsFor(id: string): GuideField[] {
 	const section = sectionOf(id);
-	if (GUIDE_SECTIONS.includes(section)) return ['openspecVersion', 'lastReviewed', 'level'];
-	if (section === REFERENCE_SECTION) return ['openspecVersion', 'lastReviewed'];
+	if (GUIDE_SECTIONS.includes(section)) return ['openspecVersion', 'lastReviewed', 'level', 'description'];
+	if (section === REFERENCE_SECTION) return ['openspecVersion', 'lastReviewed', 'description'];
 	return [];
 }
 
@@ -64,6 +68,15 @@ export function validateGuideFrontmatter(id: string, data: Record<string, unknow
 		assertRequiredFields(id, data);
 	} catch (error) {
 		issues.push((error as Error).message);
+	}
+	const description = data.description;
+	if (requiredFieldsFor(id).includes('description') && typeof description === 'string') {
+		const length = [...description].length;
+		if (length < DESCRIPTION_MIN || length > DESCRIPTION_MAX) {
+			issues.push(
+				`[contenido] La página "${id}" tiene un valor inválido en description: debe tener entre ${DESCRIPTION_MIN} y ${DESCRIPTION_MAX} caracteres (tiene ${length})`,
+			);
+		}
 	}
 	const parsed = guideMetadataSchema.safeParse(data);
 	if (!parsed.success) {
