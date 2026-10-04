@@ -1,0 +1,122 @@
+---
+title: "Claude Code"
+description: "Cómo configurar Claude Code para trabajar con OpenSpec: estructura versionada, permisos, hook de validación, modelos por fase y subagente verificador."
+openspecVersion: "1.14.0"
+lastReviewed: 2026-10-04
+level: intermedio
+sidebar:
+  order: 1
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+OpenSpec genera los comandos `/opsx:*` y los skills, pero el trabajo en equipo exige algo más: permisos acotados, validación automática y un reparto claro de contexto. Esta página recoge la configuración de Claude Code que funciona bien con OpenSpec y que conviene versionar en el repositorio.
+
+## Estructura versionada en el repositorio
+
+```text
+.claude/
+├── commands/opsx/…          # generados por openspec init (no editar)
+├── skills/…                 # generados por openspec init (no editar)
+├── agents/spec-verifier.md  # subagente de verificación independiente
+└── settings.json            # permisos, hooks y variables de entorno
+.mcp.json                    # servidores MCP del backlog, sin secretos
+CLAUDE.md                    # stack y convenciones de código
+openspec/config.yaml         # contexto de dominio y reglas de specs
+```
+
+Con `openspec init --tools claude` y el perfil `core` se generan 6 skills y 6 comandos en `.claude/`. No los edites a mano: `openspec update` los regenera y los sobrescribe.
+
+Versiona todo salvo las preferencias personales, que van en `.claude/settings.local.json`. Así todo el equipo trabaja igual.
+
+## CLAUDE.md frente a config.yaml
+
+| Fichero | Cuándo se usa | Qué poner |
+|---|---|---|
+| `CLAUDE.md` | Siempre, en toda la sesión | Stack, arquitectura, convenciones de código, comandos de build y test, reglas del repositorio |
+| `openspec/config.yaml` | Al generar artefactos OpenSpec | Glosario de dominio, reglas de proposal, specs, design y tasks |
+
+Una regla imprescindible en `CLAUDE.md`: **nunca se edita `openspec/specs/` directamente; solo cambia mediante `/opsx:archive` o `/opsx:sync`**. Si ya usas `config.yaml`, repasa [su guía](/guias/configuracion/) para no duplicar contexto en ambos ficheros.
+
+Las plantillas completas de `CLAUDE.md`, `config.yaml`, del comando `/ticket-propose` y del subagente están en [Plantillas](/referencia/plantillas/); aquí no se repiten.
+
+## Permisos, variables y hooks
+
+Un `.claude/settings.json` razonable para OpenSpec:
+
+```json title=".claude/settings.json"
+{
+  "env": { "OPENSPEC_TELEMETRY": "0" },
+  "permissions": {
+    "allow": [
+      "Bash(openspec list:*)",
+      "Bash(openspec show:*)",
+      "Bash(openspec status:*)",
+      "Bash(openspec validate:*)"
+    ],
+    "ask": [
+      "Bash(openspec archive:*)",
+      "Bash(git push:*)",
+      "Edit(./openspec/specs/**)",
+      "Write(./openspec/specs/**)"
+    ],
+    "deny": ["Read(./.env)", "Read(./.env.*)"]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "openspec validate --all --strict --no-interactive 1>&2 || exit 2"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+- **Lectura sin fricción, escritura con confirmación.** Los comandos de solo lectura de `openspec` se permiten; `archive` y las ediciones sobre `openspec/specs/` piden confirmación, que es justo el punto donde conviene que mires.
+- **Hook `Stop`.** Cuando Claude termina un turno se validan las specs. Si fallan, el código de salida 2 impide finalizar y devuelve los errores al agente para que los corrija. Es una validación local, sin esperar a la CI.
+- **Telemetría.** `OPENSPEC_TELEMETRY=0` evita enviar métricas desde los puestos del equipo.
+- **Herramientas de escritura de un MCP.** Si conectas un servidor MCP del backlog, consulta sus herramientas con `/mcp` y añade a `deny` las que modifican datos (actualizar work items, transicionar issues). El agente lee el backlog pero no lo cambia.
+
+## Modelos por fase
+
+| Fase | Modelo recomendado | Cómo fijarlo |
+|---|---|---|
+| Explore y propose | `opus` | `model: opus` en el frontmatter del comando; modo plan (Mayús+Tab) para explorar |
+| Apply | `sonnet` | `/model sonnet`: más rápido y barato, suficiente si `tasks.md` es bueno |
+| Verify | `opus` en un subagente | Contexto limpio: no se autojustifica |
+| Archive | cualquiera | Operación casi mecánica |
+
+Usa alias (`opus`, `sonnet`) en lugar de versiones concretas para que la configuración no caduque.
+
+## Subagente verificador
+
+Un subagente definido en `.claude/agents/spec-verifier.md` revisa, sin modificar nada, que cada requisito y escenario del change tenga código y test, ejecuta los tests y detecta tareas marcadas como hechas que no lo están. Complementa a `/opsx:verify` porque trabaja en un contexto limpio.
+
+Se invoca desde la conversación:
+
+```text
+Usa el subagente spec-verifier sobre el cambio rechazo-solicitudes-duplicadas
+```
+
+## Acceso y licencias
+
+- **Claude Team o Enterprise** incluye puestos de Claude Code: lo más sencillo para un piloto.
+- **Proveedores alternativos** (Amazon Bedrock, Google Vertex AI, Microsoft Foundry) son una opción si prefieres facturar por el contrato de tu nube y mantener el tratamiento de datos en tu tenant. Verifica la configuración vigente en la documentación de Claude Code.
+
+<Aside type="caution" title="Datos personales y modelo">
+Código, specs y tickets que envías al modelo pueden contener datos personales. Antes de adoptar el flujo en un equipo, valida el tratamiento con tu delegado de protección de datos. Detalles en el [plan de adopción](/equipo/adopcion/).
+</Aside>
+
+## Entorno de trabajo
+
+- Funciona igual en la **terminal** y en la **extensión de VS Code**: los comandos `/opsx:*`, el `.mcp.json` y el `settings.json` son los mismos.
+- Para cambios en paralelo usa **git worktrees**, con una sesión de Claude Code por worktree.
+
+## Siguiente paso
+
+[Otros agentes](/agentes/otros/)
