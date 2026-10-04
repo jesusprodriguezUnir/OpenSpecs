@@ -1,0 +1,110 @@
+---
+title: "config.yaml y schemas personalizados"
+description: "Cómo ajustar OpenSpec a tu proyecto con openspec/config.yaml (schema, context, rules y operations) y cómo crear schemas de flujo personalizados."
+openspecVersion: "1.14.0"
+lastReviewed: 2026-10-04
+level: avanzado
+sidebar:
+  order: 5
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+`openspec/config.yaml` adapta los artefactos que genera el agente a tu proyecto: qué flujo usar, qué contexto debe conocer y qué reglas cumple cada artefacto. Si el flujo estándar no encaja, puedes definir tu propio schema.
+
+## Estructura de config.yaml
+
+```yaml title="openspec/config.yaml"
+schema: spec-driven
+
+context: |
+  Aplicación de gestión de reservas de salas.
+  Las fechas se guardan en UTC y se muestran en la zona horaria de la sala.
+  Los códigos de error de negocio usan MAYÚSCULAS_CON_GUIONES (RESERVA_DUPLICADA).
+
+rules:
+  proposal:
+    - Indica qué equipos o integraciones se ven afectados.
+  specs:
+    - Cada requisito incluye al menos un escenario de error con su código.
+  tasks:
+    - Cada tarea de implementación tiene su tarea de test.
+
+operations:
+  apply:
+    guidance: |
+      Ejecuta los tests del módulo afectado tras cada tarea.
+  archive:
+    guidance: |
+      Comprueba que openspec validate --all --strict pasa antes de archivar.
+```
+
+- **`schema`**: el flujo de artefactos que se usa por defecto (`spec-driven` es el estándar).
+- **`context`**: se aplica a **todos** los artefactos. Incluye solo restricciones que el agente no puede deducir leyendo el código; repetir lo obvio solo gasta contexto.
+- **`rules.<artefacto>`**: reglas específicas de un artefacto (`proposal`, `specs`, `design`, `tasks`).
+- **`operations`**: orientación para la ejecución de apply y archive.
+
+<Aside>
+`operations.apply.guidance` y `operations.archive.guidance` son nuevos en 1.14 y no aparecen en la KB. Separan las instrucciones de ejecución de las reglas de cada artefacto.
+</Aside>
+
+## CLAUDE.md o config.yaml
+
+| Va en `CLAUDE.md` | Va en `config.yaml` |
+|---|---|
+| Convenciones generales del repositorio (comandos, estilo, git) | Contexto de dominio que deben reflejar los artefactos |
+| Instrucciones para cualquier tarea del agente | Reglas por artefacto (`rules`) |
+| Herramientas y entorno de desarrollo | Orientación para apply y archive (`operations`) |
+
+`openspec init --language` no sobrescribe un `config.yaml` existente: si ya lo tienes, ajusta el idioma a mano.
+
+## Schemas personalizados
+
+Un schema define qué artefactos tiene un change y en qué orden se generan. Puedes partir del estándar o crear uno desde cero.
+
+<Aside type="caution">
+`openspec schema` está marcado como **experimental** en 1.14: los comandos y el formato pueden cambiar entre versiones.
+</Aside>
+
+<Tabs syncKey="shell">
+  <TabItem label="PowerShell">
+```powershell title="PowerShell"
+# Copiar el schema estándar al proyecto para modificarlo
+openspec schema fork spec-driven mi-flujo
+# O crear uno nuevo desde cero
+openspec schema init rapido --artifacts proposal,tasks
+# Validar estructura y plantillas
+openspec schema validate mi-flujo
+# Ver de dónde se resuelve el schema
+openspec schema which
+# Crear un change con un schema concreto
+openspec new change mi-cambio --schema mi-flujo
+# Listar schemas y plantillas disponibles
+openspec schemas
+openspec templates
+```
+  </TabItem>
+  <TabItem label="bash">
+```bash title="bash"
+# Copiar el schema estándar al proyecto para modificarlo
+openspec schema fork spec-driven mi-flujo
+# O crear uno nuevo desde cero
+openspec schema init rapido --artifacts proposal,tasks
+# Validar estructura y plantillas
+openspec schema validate mi-flujo
+# Ver de dónde se resuelve el schema
+openspec schema which
+# Crear un change con un schema concreto
+openspec new change mi-cambio --schema mi-flujo
+# Listar schemas y plantillas disponibles
+openspec schemas
+openspec templates
+```
+  </TabItem>
+</Tabs>
+
+Para que un schema sea el predeterminado del proyecto, indícalo en la clave `schema` de `config.yaml`.
+
+## Siguiente paso
+
+[Claude Code](/agentes/claude-code/)

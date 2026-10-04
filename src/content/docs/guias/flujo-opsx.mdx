@@ -1,0 +1,75 @@
+---
+title: "Flujo /opsx de principio a fin"
+description: "Los comandos de chat /opsx del perfil core y del perfil ampliado, el flujo completo de un change hasta el archivado dentro de la PR y qué revisar en cada punto de control."
+openspecVersion: "1.14.0"
+lastReviewed: 2026-10-04
+level: intermedio
+sidebar:
+  order: 2
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Los comandos `/opsx:*` se ejecutan en el chat de tu asistente de IA y guían cada fase de un change: explorar, proponer, implementar y archivar. Esta página reúne todos los comandos, el flujo de equipo recomendado y los puntos donde conviene revisar.
+
+## Comandos del perfil core
+
+| Comando | Qué hace |
+|---|---|
+| `/opsx:explore` | Investiga el problema y el código sin escribir nada; sirve para aclarar ideas antes de proponer. |
+| `/opsx:propose` | Crea el change y genera proposal, delta specs, design y tasks en un paso. |
+| `/opsx:apply` | Implementa las tareas de `tasks.md` y las marca al completarlas. |
+| `/opsx:archive` | Fusiona las delta specs en las specs principales y mueve el change a `archive/`. |
+| `/opsx:sync` | Fusiona las delta specs del change en las specs principales **sin archivarlo**. |
+| `/opsx:update` | *(Experimental)* Revisa los artefactos de planificación de un change y los mantiene coherentes entre sí. No toca código. |
+
+<Aside type="caution">
+La KB (escrita para 1.13) describe `/opsx:sync` como «sincroniza el estado». En 1.14 lo que hace es fusionar las delta specs en `openspec/specs/` sin archivar el change. `/opsx:update` es nuevo y no figura en la KB.
+</Aside>
+
+## Comandos del perfil ampliado
+
+Se activan eligiendo el perfil con `openspec config profile`.
+
+| Comando | Qué hace |
+|---|---|
+| `/opsx:new` | Crea el change vacío, sin generar artefactos. |
+| `/opsx:continue` | Genera el siguiente artefacto pendiente, uno cada vez. |
+| `/opsx:ff` | Genera de una vez todos los artefactos que faltan. |
+| `/opsx:verify` | Comprueba que la implementación cumple specs, design y tasks. |
+| `/opsx:bulk-archive` | Archiva varios changes terminados a la vez. |
+| `/opsx:onboard` | Recorrido guiado de un change completo sobre tu propio repositorio. |
+
+## Flujo completo del equipo
+
+```text title="Flujo de un change"
+Ticket del backlog
+  └─ rama con el mismo nombre que el change
+      ├─ /opsx:explore        (opcional, si hay incertidumbre)
+      ├─ /opsx:propose        → proposal, specs, design, tasks
+      │     ── revisión de la propuesta ──
+      ├─ /opsx:apply          → código + tests
+      ├─ /opsx:verify         (perfil ampliado)
+      └─ /opsx:archive        → specs principales actualizadas
+  └─ PR: código + delta specs + archive
+        ── revisión de código, CI en verde ──
+  └─ merge a main
+```
+
+El **archive va dentro de la misma PR**, antes del merge. Así `main` nunca tiene código sin su spec ni specs que describan algo que no se ha fusionado.
+
+## Cambios grandes: PR de specs primero
+
+Para cambios de alto impacto, abre primero una PR **solo con el change** (proposal, specs, design y tasks). Cuando se aprueba, implementa en la misma rama o en otra. Para cambios pequeños basta con revisar las specs dentro de la PR de código.
+
+## Puntos de control
+
+| Momento | Quién revisa | Foco |
+|---|---|---|
+| Tras `propose` | Responsable técnico o equipo | ¿Resuelve el problema correcto? ¿Escenarios completos? ¿Diseño coherente con la arquitectura? |
+| Tras `verify` | Quien implementa | ¿Cada escenario tiene código y test? ¿`tasks.md` refleja la realidad? |
+| PR | Revisor de código | Código, delta specs y archive; pipeline en verde. |
+
+## Siguiente paso
+
+[Recetas: feature, bugfix, refactor, paralelo](/guias/recetas/)

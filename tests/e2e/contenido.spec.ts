@@ -20,7 +20,7 @@ test.describe('contenido', () => {
 		const header = page.locator(HEADER);
 		await expect(header.locator('[data-meta="level"] dd')).toHaveText('Intermedio');
 		await expect(header.locator('[data-meta="openspec-version"] dd')).toHaveText('1.14.0');
-		await expect(header.locator('[data-meta="last-reviewed"] dd')).toHaveText('3 de octubre de 2026');
+		await expect(header.locator('[data-meta="last-reviewed"] dd')).toHaveText('4 de octubre de 2026');
 		await expect(header.locator('[data-meta="duration"]')).toHaveCount(0);
 		await expect(header).not.toContainText('min');
 	});
@@ -33,7 +33,7 @@ test.describe('contenido', () => {
 	});
 
 	test('Scenario: Página revisada hace más de 180 días', async ({ page }) => {
-		await page.goto('/guias/flujo-opsx/');
+		await page.goto('/agentes/claude-code/');
 		const warning = page.locator('[data-stale-warning]');
 		await expect(warning).toHaveCount(1);
 		await expect(warning).toContainText('Contenido posiblemente desactualizado');

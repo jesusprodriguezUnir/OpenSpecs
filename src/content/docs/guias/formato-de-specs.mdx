@@ -1,0 +1,117 @@
+---
+title: "Escribir specs"
+description: "Cómo se escribe una spec principal y una delta spec (ADDED, MODIFIED, REMOVED) en OpenSpec, con buenas prácticas y una checklist de revisión."
+openspecVersion: "1.14.0"
+lastReviewed: 2026-10-04
+level: intermedio
+sidebar:
+  order: 1
+---
+
+Una spec describe **qué hace el sistema**, no cómo está construido. OpenSpec distingue entre las specs principales (`openspec/specs/`), que reflejan el comportamiento vigente, y las delta specs de cada change, que describen solo lo que ese change añade, modifica o elimina.
+
+## Reglas del formato
+
+- Cada requisito empieza con `### Requirement: <nombre>` y usa una palabra normativa en inglés: **SHALL** o **MUST**.
+- Cada requisito tiene al menos un `#### Scenario: <nombre>` (cuatro almohadillas; con tres, el validador no lo reconoce).
+- Los escenarios se escriben con **GIVEN / WHEN / THEN / AND** en negrita y en lista.
+- Una capacidad por carpeta: `openspec/specs/<capacidad>/spec.md`.
+- El nombre del requisito es su identificador: las deltas lo localizan por nombre exacto.
+
+## Ejemplo de spec principal
+
+```md title="openspec/specs/reservas/spec.md"
+# Reservas
+
+## Purpose
+Gestión de reservas de salas por parte de los usuarios registrados.
+
+## Requirements
+
+### Requirement: Crear reserva
+El sistema SHALL permitir reservar una sala libre para una franja horaria.
+
+#### Scenario: Reserva de una sala libre
+- **GIVEN** la sala "Norte" está libre de 10:00 a 11:00
+- **WHEN** un usuario la reserva para esa franja
+- **THEN** la reserva queda en estado "confirmada"
+
+#### Scenario: Reserva duplicada
+- **GIVEN** la sala "Norte" ya está reservada de 10:00 a 11:00
+- **WHEN** otro usuario intenta reservarla para esa franja
+- **THEN** el sistema rechaza la petición con el código `RESERVA_DUPLICADA`
+```
+
+## Delta specs
+
+Dentro de un change, la delta spec vive en `openspec/changes/<change>/specs/<capacidad>/spec.md` y agrupa los requisitos por operación. Al archivar, OpenSpec aplica cada operación sobre la spec principal.
+
+### ADDED: requisito nuevo
+
+```md title="openspec/changes/cancelacion-reservas/specs/reservas/spec.md" ins={1-9}
+## ADDED Requirements
+
+### Requirement: Cancelar reserva
+El sistema SHALL permitir cancelar una reserva confirmada hasta 2 horas antes de su inicio.
+
+#### Scenario: Cancelación dentro de plazo
+- **GIVEN** una reserva confirmada que empieza dentro de 5 horas
+- **WHEN** su titular la cancela
+- **THEN** la reserva pasa a estado "cancelada" y la sala queda libre
+```
+
+### MODIFIED: cambiar un requisito existente
+
+`MODIFIED` **reescribe el requisito completo**: copia el bloque entero de la spec principal y edítalo. Lo que no incluyas se pierde al archivar. En el ejemplo, la línea eliminada es la versión anterior y las insertadas son lo nuevo.
+
+```md title="openspec/changes/limite-reservas/specs/reservas/spec.md" del={4} ins={5,12-14}
+## MODIFIED Requirements
+
+### Requirement: Crear reserva
+El sistema SHALL permitir reservar una sala libre para una franja horaria.
+El sistema SHALL permitir reservar una sala libre para una franja horaria de 4 horas como máximo.
+
+#### Scenario: Reserva de una sala libre
+- **GIVEN** la sala "Norte" está libre de 10:00 a 11:00
+- **WHEN** un usuario la reserva para esa franja
+- **THEN** la reserva queda en estado "confirmada"
+
+#### Scenario: Franja demasiado larga
+- **WHEN** un usuario intenta reservar una sala durante 5 horas
+- **THEN** el sistema rechaza la petición con el código `FRANJA_EXCEDIDA`
+```
+
+En el fichero real no dejas la línea antigua: los marcadores solo muestran qué cambia respecto a la spec principal.
+
+### REMOVED: retirar un requisito
+
+```md title="openspec/changes/retirar-lista-espera/specs/reservas/spec.md" del={3}
+## REMOVED Requirements
+
+### Requirement: Lista de espera
+**Reason**: la lista de espera apenas se usaba y complicaba la liberación de salas.
+**Migration**: se avisa a los usuarios cuando una sala se libera; las entradas en lista de espera se eliminan.
+```
+
+`REMOVED` siempre lleva **Reason** (por qué se retira) y **Migration** (qué ocurre con quien dependía de ese comportamiento).
+
+## Buenas prácticas
+
+- Escribe comportamiento observable, no detalles de implementación (nada de tablas, clases o endpoints concretos salvo que sean el contrato).
+- Un requisito, una regla. Si un requisito necesita «y además», probablemente son dos.
+- Cubre el caso feliz y al menos un caso de error con su código (`RESERVA_DUPLICADA`).
+- Usa datos de ejemplo concretos y neutros: salas, franjas, estados. Nunca datos personales.
+- Cada escenario debe poder convertirse en un test cuyo nombre contenga `Scenario: <nombre>`.
+
+## Checklist de revisión
+
+- ¿Cada requisito usa SHALL o MUST?
+- ¿Cada requisito tiene al menos un escenario con `####`?
+- ¿Los escenarios cubren el caso feliz y los errores relevantes?
+- ¿Los `MODIFIED` incluyen el requisito completo, con todos sus escenarios?
+- ¿Los `REMOVED` explican **Reason** y **Migration**?
+- ¿Pasa `openspec validate --strict`?
+
+## Siguiente paso
+
+[Flujo /opsx de principio a fin](/guias/flujo-opsx/)
