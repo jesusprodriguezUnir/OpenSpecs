@@ -1,0 +1,218 @@
+---
+title: "Tu primer cambio en 30 minutos"
+description: "Tutorial práctico sobre un repositorio vacío: openspec init, /opsx:propose, /opsx:apply y /opsx:archive con un único requisito de gestión de reservas."
+openspecVersion: "1.14.0"
+lastReviewed: 2026-10-04
+level: inicio
+duration: 30
+sidebar:
+  order: 4
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+Vas a recorrer el ciclo completo de OpenSpec sobre un repositorio vacío con **un solo requisito pequeño** de gestión de reservas: `openspec init`, `/opsx:propose`, `/opsx:apply` y `/opsx:archive`. Cada paso termina con lo que deberías ver, para que verifiques sin adivinar.
+
+## Antes de empezar
+
+- OpenSpec 1.14.0 instalado y Node.js 20.19.0 o superior (ver la página de instalación).
+- Git.
+- **Un agente de IA compatible** con comandos de chat, por ejemplo Claude Code. Los pasos 2 a 4 se ejecutan en su chat, no en la terminal. Esta guía usa Claude Code; con otra herramienta, cambia el valor de `--tools`.
+
+<Aside type="note">
+El agente es no determinista: los textos exactos de lo que genere variarán. Verifica la **estructura** (ficheros, secciones, `SHALL`, escenarios), no las palabras.
+</Aside>
+
+## 1. Crear el repositorio e inicializar OpenSpec (5 min)
+
+<Tabs syncKey="shell">
+  <TabItem label="PowerShell">
+```powershell
+mkdir reservas-demo
+cd reservas-demo
+git init
+openspec init --tools claude
+```
+  </TabItem>
+  <TabItem label="bash">
+```bash
+mkdir reservas-demo
+cd reservas-demo
+git init
+openspec init --tools claude
+```
+  </TabItem>
+</Tabs>
+
+**Deberías ver** estas rutas nuevas:
+
+```text
+reservas-demo/
+├── .claude/                 # skills y comandos /opsx:*
+└── openspec/
+    ├── config.yaml
+    ├── specs/               # vacía
+    └── changes/             # vacía (aparecerá archive/ al archivar)
+```
+
+Comprueba que la validación no falla en un repositorio vacío:
+
+<Tabs syncKey="shell">
+  <TabItem label="PowerShell">
+```powershell
+openspec validate --all --strict --no-interactive
+```
+  </TabItem>
+  <TabItem label="bash">
+```bash
+openspec validate --all --strict --no-interactive
+```
+  </TabItem>
+</Tabs>
+
+**Deberías ver** «No items found to validate.» y código de salida 0.
+
+Abre el agente en esta carpeta. Un contexto mínimo en `openspec/config.yaml` mejora lo que genere; añade, bajo el `context` existente:
+
+```yaml
+context: |
+  Dominio: gestión de reservas (franjas horarias, clientes).
+  Documentación y specs en español; palabras normativas (SHALL) y GIVEN/WHEN/THEN en inglés.
+```
+
+## 2. Proponer el cambio con `/opsx:propose` (8 min)
+
+En el chat del agente:
+
+```text
+/opsx:propose reservas-cancelacion
+```
+
+Describe el requisito cuando te lo pida, o pégalo directamente: «Un cliente puede cancelar una reserva hasta 24 horas antes de su inicio. Si falta menos, se rechaza».
+
+**Deberías ver** una carpeta nueva con cuatro artefactos:
+
+```text
+openspec/changes/reservas-cancelacion/
+├── proposal.md
+├── specs/
+│   └── reservas/
+│       └── spec.md        # delta spec
+├── design.md
+└── tasks.md
+```
+
+Revisa a mano, antes de seguir, lo que importa. Este es el punto de control humano del flujo:
+
+1. `specs/reservas/spec.md` empieza por `## ADDED Requirements` y contiene un requisito con `SHALL` y al menos dos escenarios: cancelación a tiempo y cancelación fuera de plazo.
+2. `tasks.md` es una lista de casillas `- [ ]`, con las tareas de implementación y de test.
+3. `proposal.md` explica el porqué y el alcance sin salirse de este único requisito.
+
+Si algo no cuadra, pídeselo al agente en el mismo chat y deja que edite el mismo change. Valida el resultado:
+
+<Tabs syncKey="shell">
+  <TabItem label="PowerShell">
+```powershell
+openspec validate reservas-cancelacion --strict --no-interactive
+openspec list --changes
+```
+  </TabItem>
+  <TabItem label="bash">
+```bash
+openspec validate reservas-cancelacion --strict --no-interactive
+openspec list --changes
+```
+  </TabItem>
+</Tabs>
+
+**Deberías ver** el change como válido y listado con su progreso de tareas, todavía a 0.
+
+## 3. Implementar con `/opsx:apply` (10 min)
+
+```text
+/opsx:apply
+```
+
+Con un único change activo no hace falta indicar el nombre; si tuvieras varios, usa `/opsx:apply reservas-cancelacion`. El agente implementa las tareas de `tasks.md` y las va marcando.
+
+**Deberías ver:**
+
+- Código y tests nuevos en tu repositorio (el lenguaje depende de lo que el agente elija o de lo que indiques en `context`).
+- Todas las casillas de `tasks.md` en `- [x]`.
+- Cada escenario del delta con un test cuyo nombre lo referencia. Es una buena práctica de trazabilidad: si falta alguno, pídeselo.
+
+Comprueba el avance desde la terminal:
+
+<Tabs syncKey="shell">
+  <TabItem label="PowerShell">
+```powershell
+openspec list --changes
+git status --short
+```
+  </TabItem>
+  <TabItem label="bash">
+```bash
+openspec list --changes
+git status --short
+```
+  </TabItem>
+</Tabs>
+
+**Deberías ver** el change con todas las tareas completadas y los ficheros nuevos sin confirmar en Git.
+
+## 4. Archivar con `/opsx:archive` (5 min)
+
+```text
+/opsx:archive
+```
+
+OpenSpec fusiona el delta en la spec principal y mueve el change a `archive/`.
+
+**Deberías ver:**
+
+```text
+openspec/
+├── specs/
+│   └── reservas/
+│       └── spec.md        # ahora contiene "Cancelación de reserva"
+└── changes/
+    └── archive/
+        └── <fecha>-reservas-cancelacion/
+```
+
+Verifica el estado final y confirma el trabajo:
+
+<Tabs syncKey="shell">
+  <TabItem label="PowerShell">
+```powershell
+openspec list --specs
+openspec validate --all --strict --no-interactive
+git add -A
+git commit -m "feat: cancelación de reservas"
+```
+  </TabItem>
+  <TabItem label="bash">
+```bash
+openspec list --specs
+openspec validate --all --strict --no-interactive
+git add -A
+git commit -m "feat: cancelación de reservas"
+```
+  </TabItem>
+</Tabs>
+
+**Deberías ver** la spec `reservas` listada y la validación sin errores.
+
+<Aside type="tip">
+Archiva siempre antes del merge, dentro de la misma PR: así el código y las specs actualizadas entran juntos en `main` y nunca quedan desalineados.
+</Aside>
+
+## Si algo falla
+
+- **El agente no reconoce `/opsx:propose`.** Reinicia el agente en la carpeta del repositorio para que cargue `.claude/`, o regenera los ficheros con `openspec update`.
+- **`validate --strict` falla.** Lee el mensaje: casi siempre es un requisito sin `SHALL` o sin escenarios, o un encabezado mal escrito. Corrígelo en el delta y vuelve a validar.
+- **El change es mayor de lo previsto.** Reduce el alcance a un único requisito antes de aplicar: un change pequeño es más fácil de revisar.
+
+## Siguiente paso
+
+[Escribir specs: formato y buenas prácticas](/guias/formato-de-specs/)
