@@ -1,0 +1,141 @@
+---
+title: "CLI openspec"
+description: "Referencia de la CLI openspec 1.14.0 extraída de su ayuda: instalación, comandos de primer nivel, subcomandos y flags más usados, con variantes para PowerShell y bash."
+openspecVersion: "1.14.0"
+lastReviewed: 2026-10-04
+sidebar:
+  order: 2
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+La CLI `openspec` se ejecuta en la terminal. Inicializa el repositorio, valida y archiva changes, y genera las instrucciones que usan los comandos de chat. Esta referencia parte de la ayuda de la versión fijada (`openspec --help` y `openspec <comando> --help`), no de la KB escrita para 1.13.
+
+<Aside type="tip">
+Cualquier comando acepta `--help`. Si esta página y tu terminal no coinciden, comprueba tu versión con `openspec --version`: manda la ayuda de la versión instalada.
+</Aside>
+
+## Instalación y versión
+
+Requiere Node.js 20.19 o superior. Fija la versión en lugar de usar `@latest`.
+
+<Tabs syncKey="shell">
+  <TabItem label="PowerShell">
+```powershell title="PowerShell"
+npm install -g @fission-ai/openspec@1.14.0
+openspec --version
+# Versión instalada y si hay actualización disponible
+openspec version --check
+# Desactivar la telemetría anónima
+openspec config set telemetry.enabled false
+$env:OPENSPEC_TELEMETRY = "0"
+```
+  </TabItem>
+  <TabItem label="bash">
+```bash title="bash"
+npm install -g @fission-ai/openspec@1.14.0
+openspec --version
+# Versión instalada y si hay actualización disponible
+openspec version --check
+# Desactivar la telemetría anónima
+openspec config set telemetry.enabled false
+export OPENSPEC_TELEMETRY=0
+```
+  </TabItem>
+</Tabs>
+
+Opciones globales: `--no-color` desactiva el color de la salida y `-h` / `--help` muestra la ayuda.
+
+## Comandos de primer nivel
+
+### Configuración del proyecto
+
+| Comando | Qué hace |
+|---|---|
+| `openspec init [ruta]` | Inicializa OpenSpec en el proyecto. `--tools claude` evita el asistente interactivo; `--language` fija el idioma de los artefactos nuevos; `--profile core` o `custom`; `--force` limpia ficheros legacy. |
+| `openspec update [ruta]` | Regenera los ficheros de instrucciones (comandos y skills) tras subir de versión. `--force` los regenera aunque estén al día. |
+| `openspec config` | Configuración global: `path`, `list`, `get`, `set`, `unset`, `reset`, `edit` y `profile`. |
+| `openspec completion` | Autocompletado de la shell: `generate`, `install` y `uninstall`. |
+| `openspec version` | Versión instalada; con `--check` comprueba si hay actualización. |
+| `openspec feedback <mensaje>` | Envía feedback sobre OpenSpec; `--body` añade detalle. |
+
+### Changes y specs
+
+| Comando | Qué hace |
+|---|---|
+| `openspec new change <nombre>` | Crea la carpeta de un change. Admite `--description`, `--goal` y `--schema`. |
+| `openspec list` | Lista los changes activos; `--specs` lista las specs y `--archived` los archivados. |
+| `openspec show [elemento]` | Muestra un change o una spec; `--type change` o `--type spec` si el nombre es ambiguo, `--json` para máquinas. |
+| `openspec view` | Dashboard interactivo de specs y changes. |
+| `openspec status` | Estado de los artefactos de un change (`--change <id>`) o de todos (`--all`). |
+| `openspec validate [elemento]` | Valida changes y specs: `--all`, `--changes`, `--specs`, `--strict`, `--json`, `--no-interactive`. |
+| `openspec archive [change]` | Fusiona las delta specs en `openspec/specs/` y mueve el change a `archive/`. `--skip-specs` para cambios sin comportamiento; `-y` / `--yes` sin confirmaciones. |
+| `openspec change` | Subcomandos `show`, `list` y `validate` sobre changes (`openspec change list` está obsoleto: usa `openspec list`). |
+| `openspec spec` | Subcomandos `show`, `list` y `validate` sobre specs. |
+
+### Schemas e instrucciones
+
+| Comando | Qué hace |
+|---|---|
+| `openspec schemas` | Lista los schemas de workflow disponibles. |
+| `openspec schema` | *(Experimental)* `which`, `validate`, `fork` e `init` para schemas propios. |
+| `openspec templates` | Rutas resueltas de las plantillas de cada artefacto de un schema. |
+| `openspec instructions [artefacto]` | Instrucciones enriquecidas para un artefacto, apply o archive; es lo que consultan las skills. |
+
+### Raíz, stores y vistas de trabajo
+
+| Comando | Qué hace |
+|---|---|
+| `openspec doctor` | Salud de las relaciones en la raíz OpenSpec resuelta. |
+| `openspec context` | Contexto de trabajo de la raíz resuelta. |
+| `openspec store` | Stores: repositorios OpenSpec independientes registrados en la máquina (`setup`, `register`, `unregister`, `remove`, `list`, `doctor`). Muchos comandos aceptan `--store <id>`. |
+| `openspec workset` | Vistas de trabajo personales y locales: `create`, `list`, `open`, `remove`. |
+
+## Uso diario
+
+<Tabs syncKey="shell">
+  <TabItem label="PowerShell">
+```powershell title="PowerShell"
+# Inicializar sin preguntas para Claude Code
+openspec init --tools claude
+# Crear un change del dominio de reservas
+openspec new change rechazo-reservas-solapadas
+# Ver estado y validar antes de la PR
+openspec status --change rechazo-reservas-solapadas
+openspec validate rechazo-reservas-solapadas --strict
+# Archivar dentro de la PR
+openspec archive rechazo-reservas-solapadas --yes
+```
+  </TabItem>
+  <TabItem label="bash">
+```bash title="bash"
+# Inicializar sin preguntas para Claude Code
+openspec init --tools claude
+# Crear un change del dominio de reservas
+openspec new change rechazo-reservas-solapadas
+# Ver estado y validar antes de la PR
+openspec status --change rechazo-reservas-solapadas
+openspec validate rechazo-reservas-solapadas --strict
+# Archivar dentro de la PR
+openspec archive rechazo-reservas-solapadas --yes
+```
+  </TabItem>
+</Tabs>
+
+## Validación en CI
+
+```bash
+openspec validate --all --strict --no-interactive
+```
+
+En un repositorio recién inicializado devuelve «No items found to validate.» con código 0, así que el job de CI no falla antes del primer change.
+
+## Refactor sin cambio de comportamiento
+
+```bash
+openspec archive refactor-repositorio-reservas --skip-specs
+```
+
+## Siguiente paso
+
+[Plantillas](/referencia/plantillas/)

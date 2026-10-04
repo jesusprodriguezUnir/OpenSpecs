@@ -1,0 +1,591 @@
+{
+	"version": "1.14.0",
+	"globalFlags": [
+		"-V",
+		"--version",
+		"--no-color",
+		"-h",
+		"--help"
+	],
+	"commands": {
+		"version": {
+			"subcommands": [],
+			"flags": [
+				"--json",
+				"--check",
+				"-h",
+				"--help"
+			]
+		},
+		"init": {
+			"subcommands": [],
+			"flags": [
+				"--tools",
+				"--language",
+				"--force",
+				"--profile",
+				"--no-animation",
+				"--copilot-cloud",
+				"--no-copilot-cloud",
+				"-h",
+				"--help"
+			]
+		},
+		"update": {
+			"subcommands": [],
+			"flags": [
+				"--force",
+				"-h",
+				"--help"
+			]
+		},
+		"list": {
+			"subcommands": [],
+			"flags": [
+				"--specs",
+				"--changes",
+				"--archived",
+				"--all",
+				"--sort",
+				"--json",
+				"--store",
+				"-h",
+				"--help"
+			]
+		},
+		"view": {
+			"subcommands": [],
+			"flags": [
+				"--store",
+				"-h",
+				"--help"
+			]
+		},
+		"change": {
+			"subcommands": [
+				"show",
+				"list",
+				"validate",
+				"help"
+			],
+			"flags": [
+				"-h",
+				"--help"
+			]
+		},
+		"change show": {
+			"subcommands": [],
+			"flags": [
+				"--json",
+				"--deltas-only",
+				"--requirements-only",
+				"--diff",
+				"--no-interactive",
+				"-h",
+				"--help"
+			]
+		},
+		"change list": {
+			"subcommands": [],
+			"flags": [
+				"--json",
+				"--long",
+				"-h",
+				"--help"
+			]
+		},
+		"change validate": {
+			"subcommands": [],
+			"flags": [
+				"--strict",
+				"--json",
+				"--no-interactive",
+				"-h",
+				"--help"
+			]
+		},
+		"archive": {
+			"subcommands": [],
+			"flags": [
+				"-y",
+				"--yes",
+				"--skip-specs",
+				"--no-validate",
+				"--json",
+				"--store",
+				"-h",
+				"--help"
+			]
+		},
+		"spec": {
+			"subcommands": [
+				"show",
+				"list",
+				"validate",
+				"help"
+			],
+			"flags": [
+				"-h",
+				"--help"
+			]
+		},
+		"spec show": {
+			"subcommands": [],
+			"flags": [
+				"--json",
+				"--requirements",
+				"--no-scenarios",
+				"-r",
+				"--requirement",
+				"--no-interactive",
+				"-h",
+				"--help"
+			]
+		},
+		"spec list": {
+			"subcommands": [],
+			"flags": [
+				"--json",
+				"--long",
+				"-h",
+				"--help"
+			]
+		},
+		"spec validate": {
+			"subcommands": [],
+			"flags": [
+				"--strict",
+				"--json",
+				"--no-interactive",
+				"-h",
+				"--help"
+			]
+		},
+		"config": {
+			"subcommands": [
+				"path",
+				"list",
+				"get",
+				"set",
+				"unset",
+				"reset",
+				"edit",
+				"profile",
+				"help"
+			],
+			"flags": [
+				"--scope",
+				"-h",
+				"--help"
+			]
+		},
+		"config path": {
+			"subcommands": [],
+			"flags": [
+				"-h",
+				"--help"
+			]
+		},
+		"config list": {
+			"subcommands": [],
+			"flags": [
+				"--json",
+				"-h",
+				"--help"
+			]
+		},
+		"config get": {
+			"subcommands": [],
+			"flags": [
+				"-h",
+				"--help"
+			]
+		},
+		"config set": {
+			"subcommands": [],
+			"flags": [
+				"--string",
+				"--allow-unknown",
+				"-h",
+				"--help"
+			]
+		},
+		"config unset": {
+			"subcommands": [],
+			"flags": [
+				"-h",
+				"--help"
+			]
+		},
+		"config reset": {
+			"subcommands": [],
+			"flags": [
+				"--all",
+				"-y",
+				"--yes",
+				"-h",
+				"--help"
+			]
+		},
+		"config edit": {
+			"subcommands": [],
+			"flags": [
+				"-h",
+				"--help"
+			]
+		},
+		"config profile": {
+			"subcommands": [],
+			"flags": [
+				"-h",
+				"--help"
+			]
+		},
+		"schema": {
+			"subcommands": [
+				"which",
+				"validate",
+				"fork",
+				"init",
+				"help"
+			],
+			"flags": [
+				"-h",
+				"--help"
+			]
+		},
+		"schema which": {
+			"subcommands": [],
+			"flags": [
+				"--json",
+				"--all",
+				"-h",
+				"--help"
+			]
+		},
+		"schema validate": {
+			"subcommands": [],
+			"flags": [
+				"--json",
+				"--verbose",
+				"-h",
+				"--help"
+			]
+		},
+		"schema fork": {
+			"subcommands": [],
+			"flags": [
+				"--json",
+				"--force",
+				"-h",
+				"--help"
+			]
+		},
+		"schema init": {
+			"subcommands": [],
+			"flags": [
+				"--json",
+				"--description",
+				"--artifacts",
+				"--default",
+				"--no-default",
+				"--force",
+				"-h",
+				"--help"
+			]
+		},
+		"store": {
+			"subcommands": [
+				"setup",
+				"register",
+				"unregister",
+				"remove",
+				"list",
+				"ls",
+				"doctor"
+			],
+			"flags": [
+				"-h",
+				"--help"
+			]
+		},
+		"store setup": {
+			"subcommands": [],
+			"flags": [
+				"--path",
+				"--init-git",
+				"--no-init-git",
+				"--remote",
+				"--json",
+				"-h",
+				"--help"
+			]
+		},
+		"store register": {
+			"subcommands": [],
+			"flags": [
+				"--id",
+				"--yes",
+				"--json",
+				"-h",
+				"--help"
+			]
+		},
+		"store unregister": {
+			"subcommands": [],
+			"flags": [
+				"--json",
+				"-h",
+				"--help"
+			]
+		},
+		"store remove": {
+			"subcommands": [],
+			"flags": [
+				"--yes",
+				"--json",
+				"-h",
+				"--help"
+			]
+		},
+		"store list": {
+			"subcommands": [],
+			"flags": [
+				"--json",
+				"-h",
+				"--help"
+			]
+		},
+		"store doctor": {
+			"subcommands": [],
+			"flags": [
+				"--json",
+				"-h",
+				"--help"
+			]
+		},
+		"doctor": {
+			"subcommands": [],
+			"flags": [
+				"--store",
+				"--json",
+				"-h",
+				"--help"
+			]
+		},
+		"context": {
+			"subcommands": [],
+			"flags": [
+				"--store",
+				"--json",
+				"--code-workspace",
+				"--force",
+				"-h",
+				"--help"
+			]
+		},
+		"workset": {
+			"subcommands": [
+				"create",
+				"list",
+				"ls",
+				"open",
+				"remove"
+			],
+			"flags": [
+				"-h",
+				"--help"
+			]
+		},
+		"workset create": {
+			"subcommands": [],
+			"flags": [
+				"--member",
+				"--tool",
+				"--json",
+				"-h",
+				"--help"
+			]
+		},
+		"workset list": {
+			"subcommands": [],
+			"flags": [
+				"--json",
+				"-h",
+				"--help"
+			]
+		},
+		"workset open": {
+			"subcommands": [],
+			"flags": [
+				"--tool",
+				"-h",
+				"--help"
+			]
+		},
+		"workset remove": {
+			"subcommands": [],
+			"flags": [
+				"--yes",
+				"--json",
+				"-h",
+				"--help"
+			]
+		},
+		"validate": {
+			"subcommands": [],
+			"flags": [
+				"--all",
+				"--changes",
+				"--specs",
+				"--archived",
+				"--report",
+				"--type",
+				"--strict",
+				"--json",
+				"--concurrency",
+				"--no-interactive",
+				"--store",
+				"-h",
+				"--help"
+			]
+		},
+		"show": {
+			"subcommands": [],
+			"flags": [
+				"--json",
+				"--type",
+				"--no-interactive",
+				"--deltas-only",
+				"--requirements-only",
+				"--diff",
+				"--requirements",
+				"--no-scenarios",
+				"-r",
+				"--requirement",
+				"--store",
+				"-h",
+				"--help"
+			]
+		},
+		"feedback": {
+			"subcommands": [],
+			"flags": [
+				"--body",
+				"-h",
+				"--help"
+			]
+		},
+		"completion": {
+			"subcommands": [
+				"generate",
+				"install",
+				"uninstall",
+				"help"
+			],
+			"flags": [
+				"-h",
+				"--help"
+			]
+		},
+		"completion generate": {
+			"subcommands": [],
+			"flags": [
+				"-h",
+				"--help"
+			]
+		},
+		"completion install": {
+			"subcommands": [],
+			"flags": [
+				"--verbose",
+				"-h",
+				"--help"
+			]
+		},
+		"completion uninstall": {
+			"subcommands": [],
+			"flags": [
+				"-y",
+				"--yes",
+				"-h",
+				"--help"
+			]
+		},
+		"status": {
+			"subcommands": [],
+			"flags": [
+				"--change",
+				"--all",
+				"--schema",
+				"--json",
+				"--store",
+				"-h",
+				"--help"
+			]
+		},
+		"instructions": {
+			"subcommands": [],
+			"flags": [
+				"--change",
+				"--schema",
+				"--json",
+				"--store",
+				"-h",
+				"--help"
+			]
+		},
+		"templates": {
+			"subcommands": [],
+			"flags": [
+				"--schema",
+				"--json",
+				"-h",
+				"--help"
+			]
+		},
+		"schemas": {
+			"subcommands": [],
+			"flags": [
+				"--json",
+				"--store",
+				"-h",
+				"--help"
+			]
+		},
+		"new": {
+			"subcommands": [
+				"change",
+				"help"
+			],
+			"flags": [
+				"-h",
+				"--help"
+			]
+		},
+		"new change": {
+			"subcommands": [],
+			"flags": [
+				"--description",
+				"--goal",
+				"--schema",
+				"--json",
+				"--store",
+				"-h",
+				"--help"
+			]
+		},
+		"help": {
+			"subcommands": [],
+			"flags": []
+		}
+	},
+	"chatCommands": [
+		"/opsx:apply",
+		"/opsx:archive",
+		"/opsx:explore",
+		"/opsx:propose",
+		"/opsx:sync",
+		"/opsx:update"
+	]
+}

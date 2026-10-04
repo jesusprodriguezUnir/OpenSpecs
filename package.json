@@ -12,7 +12,8 @@
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
     "test": "npm run test:unit && npm run test:e2e",
-    "links": "node scripts/links.mjs"
+    "links": "node scripts/links.mjs",
+    "snapshot:openspec": "node scripts/openspec-help-snapshot.mjs"
   },
   "dependencies": {
     "@astrojs/starlight": "0.42.5",

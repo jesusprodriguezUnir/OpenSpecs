@@ -1,0 +1,25 @@
+---
+title: "Documentación, vídeos y comunidad"
+description: "Recursos externos para aprender OpenSpec: documentación oficial, artículos de la comunidad y vídeos, con su tipo e idioma y un filtro por tipo."
+sidebar:
+  order: 1
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import ResourceList from '../../components/ResourceList.astro';
+
+Enlaces externos seleccionados para profundizar en OpenSpec. La mayoría están en inglés; el idioma de cada recurso aparece junto a su tipo.
+
+<Aside type="caution" title="Tutoriales antiguos">
+Las versiones anteriores a la 1.x usaban comandos y ficheros distintos, como `/openspec:proposal` o `project.md`. Los actuales son los comandos `/opsx:*` y `openspec/config.yaml`. Ante cualquier discrepancia, manda la documentación oficial de la versión que tengas instalada.
+</Aside>
+
+<ResourceList />
+
+## Ruta de aprendizaje sugerida
+
+1. Lee Getting Started y Core Concepts y mira un vídeo de instalación.
+2. Instala OpenSpec en un repositorio de pruebas y sigue [tu primer cambio](/empieza/primer-cambio/).
+3. Lee Existing Projects y Examples & Recipes.
+4. Escribe un `config.yaml` real para un proyecto de tu equipo.
+5. Haz un primer cambio real y pequeño sobre un proyecto existente.

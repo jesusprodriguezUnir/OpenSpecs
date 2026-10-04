@@ -1,0 +1,169 @@
+# Resources listed on /recursos/ (collection "resources", schema in src/lib/resources-schema.ts).
+# Source: docs/openspec-kb/02-recursos-y-aprendizaje.md. Each entry needs an explicit id.
+# type: oficial | comunidad | video · lang: es | en · url: absolute https only.
+
+- id: repositorio-openspec
+  title: Repositorio de OpenSpec en GitHub
+  url: https://github.com/Fission-AI/OpenSpec
+  type: oficial
+  lang: en
+- id: openspec-dev
+  title: openspec.dev
+  url: https://openspec.dev
+  type: oficial
+  lang: en
+- id: documentacion-oficial
+  title: Documentación oficial (carpeta docs/)
+  url: https://github.com/Fission-AI/OpenSpec/tree/main/docs
+  type: oficial
+  lang: en
+- id: getting-started
+  title: Getting Started
+  url: https://github.com/Fission-AI/OpenSpec/blob/main/docs/getting-started.md
+  type: oficial
+  lang: en
+- id: core-concepts
+  title: Core Concepts
+  url: https://github.com/Fission-AI/OpenSpec/blob/main/docs/overview.md
+  type: oficial
+  lang: en
+- id: existing-projects
+  title: Existing Projects
+  url: https://github.com/Fission-AI/OpenSpec/blob/main/docs/existing-projects.md
+  type: oficial
+  lang: en
+- id: examples-recipes
+  title: Examples & Recipes
+  url: https://github.com/Fission-AI/OpenSpec/blob/main/docs/examples.md
+  type: oficial
+  lang: en
+- id: workflows
+  title: Workflows
+  url: https://github.com/Fission-AI/OpenSpec/blob/main/docs/workflows.md
+  type: oficial
+  lang: en
+- id: explore-first
+  title: Explore First
+  url: https://github.com/Fission-AI/OpenSpec/blob/main/docs/explore.md
+  type: oficial
+  lang: en
+- id: how-commands-work
+  title: How Commands Work
+  url: https://github.com/Fission-AI/OpenSpec/blob/main/docs/how-commands-work.md
+  type: oficial
+  lang: en
+- id: commands
+  title: Commands
+  url: https://github.com/Fission-AI/OpenSpec/blob/main/docs/commands.md
+  type: oficial
+  lang: en
+- id: cli
+  title: CLI
+  url: https://github.com/Fission-AI/OpenSpec/blob/main/docs/cli.md
+  type: oficial
+  lang: en
+- id: editing-changes
+  title: Editing Changes
+  url: https://github.com/Fission-AI/OpenSpec/blob/main/docs/editing-changes.md
+  type: oficial
+  lang: en
+- id: customization
+  title: Customization
+  url: https://github.com/Fission-AI/OpenSpec/blob/main/docs/customization.md
+  type: oficial
+  lang: en
+- id: stores-beta
+  title: Stores (Beta)
+  url: https://github.com/Fission-AI/OpenSpec/blob/main/docs/stores-beta/user-guide.md
+  type: oficial
+  lang: en
+- id: supported-tools
+  title: Supported Tools
+  url: https://github.com/Fission-AI/OpenSpec/blob/main/docs/supported-tools.md
+  type: oficial
+  lang: en
+- id: faq
+  title: FAQ
+  url: https://github.com/Fission-AI/OpenSpec/blob/main/docs/faq.md
+  type: oficial
+  lang: en
+- id: troubleshooting
+  title: Troubleshooting
+  url: https://github.com/Fission-AI/OpenSpec/blob/main/docs/troubleshooting.md
+  type: oficial
+  lang: en
+- id: glossary
+  title: Glossary
+  url: https://github.com/Fission-AI/OpenSpec/blob/main/docs/glossary.md
+  type: oficial
+  lang: en
+- id: schema-spec-driven
+  title: Schema por defecto spec-driven
+  url: https://github.com/Fission-AI/OpenSpec/tree/main/schemas/spec-driven
+  type: oficial
+  lang: en
+- id: openspec-con-openspec
+  title: El propio proyecto desarrollado con OpenSpec
+  url: https://github.com/Fission-AI/OpenSpec/tree/main/openspec
+  type: oficial
+  lang: en
+- id: discord
+  title: Comunidad en Discord
+  url: https://discord.gg/YctCnvvshC
+  type: oficial
+  lang: en
+- id: intent-driven
+  title: intent-driven.dev — OpenSpec
+  url: https://intent-driven.dev/knowledge/openspec/
+  type: comunidad
+  lang: en
+- id: linear-mcp-openspec
+  title: Linear MCP + OpenSpec
+  url: https://intent-driven.dev/blog/2026/01/11/linear-mcp-openspec-sdd-workflow/
+  type: comunidad
+  lang: en
+- id: mapping-openspec-jira
+  title: Mapping OpenSpec to Jira
+  url: https://www.rushis.com/mapping-openspec-to-jira-sdd-without-abandoning-your-backlog/
+  type: comunidad
+  lang: en
+- id: deep-dive-arquitectura
+  title: Deep dive de arquitectura de OpenSpec
+  url: https://redreamality.com/garden/notes/openspec-guide/
+  type: comunidad
+  lang: en
+- id: openspec-mcp
+  title: openspec-mcp (servidor MCP de la comunidad)
+  url: https://github.com/Lumiaqian/openspec-mcp
+  type: comunidad
+  lang: en
+- id: video-getting-started
+  title: Getting Started with OpenSpec — Setup Tutorial
+  url: https://www.youtube.com/watch?v=raPTOBUpc3M
+  type: video
+  lang: en
+- id: video-claude-code
+  title: "Build with OpenSpec: Spec-Driven Development in Claude Code"
+  url: https://www.youtube.com/watch?v=FpBYgYyU-SE
+  type: video
+  lang: en
+- id: video-spec-kit
+  title: "Spec-Driven Development: GitHub Spec Kit & OpenSpec Explained"
+  url: https://www.youtube.com/watch?v=C-TzYCEHXZc
+  type: video
+  lang: en
+- id: video-ai-agents
+  title: "Spec-Driven Development for AI Agents: I Tried OpenSpec and Others"
+  url: https://www.youtube.com/watch?v=d3Glwdf_xA8
+  type: video
+  lang: en
+- id: video-github-tutorial
+  title: OpenSpec GitHub Tutorial
+  url: https://www.youtube.com/watch?v=mNlXDfAa22k
+  type: video
+  lang: en
+- id: video-tutorial-every-developer
+  title: The OpenSpec Tutorial Every Developer Needs
+  url: https://www.youtube.com/watch?v=OdYZFDBHLk4
+  type: video
+  lang: en
