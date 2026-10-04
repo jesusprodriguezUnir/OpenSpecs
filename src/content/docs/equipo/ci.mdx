@@ -1,0 +1,83 @@
+---
+title: "Pipeline y validación en CI"
+description: "Cómo validar las specs en integración continua con Azure Pipelines o GitHub Actions, con la versión de OpenSpec fijada y una regla opcional para exigir un change."
+openspecVersion: "1.14.0"
+lastReviewed: 2026-10-04
+level: avanzado
+sidebar:
+  order: 3
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+La validación local (el hook `Stop` de [Claude Code](/agentes/claude-code/)) avisa pronto, pero no obliga. Lo que hace obligatoria la disciplina es una comprobación en la CI que bloquee la fusión.
+
+## Qué validar
+
+El comando es el mismo en cualquier plataforma:
+
+```bash
+openspec validate --all --strict --no-interactive
+```
+
+Comprueba que todas las specs y changes cumplen el formato. `--strict` convierte las advertencias en errores y `--no-interactive` evita preguntas en un entorno sin terminal.
+
+## Pipeline mínima
+
+<Tabs syncKey="ci">
+  <TabItem label="Azure Pipelines">
+```yaml title="azure-pipelines.openspec.yml"
+trigger: none
+pool: { vmImage: ubuntu-latest }
+steps:
+  - task: NodeTool@0
+    inputs: { versionSpec: '22.x' }
+  - script: npm i -g @fission-ai/openspec@1.14.0
+    displayName: Install OpenSpec
+  - script: openspec validate --all --strict --no-interactive
+    displayName: Validate specs
+    env: { OPENSPEC_TELEMETRY: '0' }
+```
+
+Con Azure Repos, regístrala como **Build Validation** en la branch policy de `main`.
+  </TabItem>
+  <TabItem label="GitHub Actions">
+```yaml title=".github/workflows/openspec.yml"
+name: openspec
+on:
+  pull_request:
+  push:
+    branches: [main]
+env:
+  OPENSPEC_TELEMETRY: '0'
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm i -g @fission-ai/openspec@1.14.0
+      - run: openspec validate --all --strict --no-interactive
+```
+  </TabItem>
+</Tabs>
+
+<Aside type="caution" title="Fija la versión">
+Instala siempre una versión concreta de OpenSpec, nunca la última. Así los builds son reproducibles y una actualización no rompe la pipeline un martes cualquiera. Actualiza la versión en una rama dedicada.
+</Aside>
+
+## Regla opcional: no hay código sin change
+
+Puedes hacer fallar la CI si una PR modifica el código fuente sin tocar `openspec/changes/`, salvo que lleve una etiqueta `no-spec`. Define la excepción desde el primer día: hotfixes, configuración y cambios editoriales son casos legítimos, y sin una salida explícita la regla se acaba saltando de formas peores.
+
+Revisa de vez en cuando cuántas PR usan `no-spec`: si crecen, el proceso se está erosionando.
+
+## Automatización futura
+
+Cuando el flujo esté asentado, puedes ejecutar Claude Code en modo no interactivo (`claude -p`) en la pipeline con el prompt del verificador y publicar el resultado como comentario en la PR. No lo hagas en el primer sprint: mide antes el valor de la revisión humana y el coste en tokens por PR.
+
+## Siguiente paso
+
+[Plan de adopción y riesgos](/equipo/adopcion/)

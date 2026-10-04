@@ -1,0 +1,76 @@
+---
+title: "Integración con Azure DevOps"
+description: "Cómo integrar OpenSpec con Azure Boards y Azure Repos: convención AB#, servidor MCP local, validación en la branch policy y estados por automatización."
+openspecVersion: "1.14.0"
+lastReviewed: 2026-10-04
+level: avanzado
+sidebar:
+  order: 2
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+El planteamiento es el mismo que con [Jira](/equipo/jira/): el backlog guarda el *qué* y el *estado*, y el repositorio guarda el *cómo* y la fuente de verdad del comportamiento. Esta página recoge lo que cambia con Azure DevOps.
+
+## Mapeo de conceptos
+
+| Azure Boards | OpenSpec |
+|---|---|
+| Epic o Feature | Dominio en `openspec/specs/<dominio>/` y varios changes |
+| User Story o PBI | **Un change** |
+| Criterios de aceptación | Escenarios WHEN/THEN en la delta spec |
+| Bug | Change con un requisito MODIFIED |
+| Task | `tasks.md`; no la dupliques en Boards |
+
+## Convención de nombres
+
+- **Nombre del change = nombre de la rama**: `ab123-rechazo-solicitudes-duplicadas`.
+- **Commits y PR con `AB#123`**: Azure DevOps enlaza automáticamente el work item.
+- **Primera línea de `proposal.md`**: enlace al work item.
+
+## Servidor MCP de Azure DevOps
+
+Microsoft ofrece dos servidores:
+
+- **Remoto**, en `https://mcp.dev.azure.com/{organizacion}`. Usa autenticación con Microsoft Entra.
+- **Local**, el paquete `@azure-devops/mcp`, que ejecutas con `npx` y se autentica, por ejemplo, con Azure CLI.
+
+<Aside type="caution" title="Revisado el 4 de octubre de 2026">
+El servidor remoto ya está disponible de forma general, pero Claude Code, Claude Desktop, Cursor y ChatGPT **todavía no pueden conectarse** a él: Entra no admite aún el registro dinámico de clientes OAuth que necesitan. Funcionan Visual Studio y VS Code. Con Claude Code, usa el servidor local, que sí está soportado. Verifica el estado en el [repositorio oficial](https://github.com/microsoft/azure-devops-mcp) antes de decidir.
+</Aside>
+
+Configuración del servidor local, con carga selectiva de dominios y sin secretos en el repositorio:
+
+```json title=".mcp.json"
+{
+  "mcpServers": {
+    "ado": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y", "@azure-devops/mcp", "${ADO_ORG}",
+        "-d", "core", "work", "work-items", "repositories",
+        "--authentication", "azcli"
+      ]
+    }
+  }
+}
+```
+
+Necesitas haber hecho `az login` y definir la variable de entorno `ADO_ORG`. Incluye siempre el dominio `core`; añade solo los demás dominios que necesites.
+
+## Estados: automatización nativa
+
+Con `AB#123` en la PR, activa la opción de completar los work items enlazados al completar la PR. El agente no debe transicionar estados; como mucho, puede comentar el enlace a la propuesta.
+
+## Validación en la branch policy
+
+Con Azure Repos, el trigger `pr:` del YAML no se aplica. Registra la pipeline de validación como **Build Validation** en la branch policy de `main`. La definición de la pipeline está en [Pipeline y validación en CI](/equipo/ci/).
+
+<Aside type="caution" title="Datos personales y RGPD">
+Los work items pueden contener datos personales que el servidor MCP enviaría al modelo. Revisa el tratamiento con tu delegado de protección de datos antes de conectarlo, usa permisos mínimos y de solo lectura, y añade a `deny` las herramientas de escritura del servidor.
+</Aside>
+
+## Siguiente paso
+
+[Pipeline y validación en CI](/equipo/ci/)

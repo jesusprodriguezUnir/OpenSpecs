@@ -1,0 +1,91 @@
+---
+title: "Integración con Jira"
+description: "Cómo conectar OpenSpec con Jira sin duplicar información: mapeo de conceptos, convención de nombres, servidor MCP de solo lectura y estados por automatización."
+openspecVersion: "1.14.0"
+lastReviewed: 2026-10-04
+level: avanzado
+sidebar:
+  order: 1
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Jira y OpenSpec responden a preguntas distintas. Si intentas sincronizar todo en ambos sentidos, divergen en pocas semanas. El principio que funciona es **no duplicar**.
+
+## Principio: cada cosa en su sitio
+
+- **Jira** guarda el *qué* de negocio, los criterios de aceptación y el **estado**. Es donde trabaja quien prioriza.
+- **El repositorio (OpenSpec)** guarda el *cómo* técnico y es la **fuente de verdad del comportamiento**. Es donde trabaja el equipo de desarrollo.
+
+## Mapeo de conceptos
+
+| Jira | OpenSpec |
+|---|---|
+| Epic o Feature | Dominio en `openspec/specs/<dominio>/` y varios changes |
+| Story | **Un change** (`openspec/changes/<id>/`) |
+| Criterios de aceptación | Escenarios WHEN/THEN en la delta spec |
+| Bug | Change con un requisito MODIFIED que describe el comportamiento correcto |
+| Deuda técnica o refactor | Change sin delta specs (`openspec archive --skip-specs`) |
+| Sub-tasks | `tasks.md`; elige una sola fuente y no las dupliques en Jira |
+| Estado (To Do, In Progress, Done) | Derivado de eventos de Git (rama, PR, merge) |
+
+## Convención de nombres
+
+Es la integración más importante, y no necesita ninguna herramienta:
+
+- **El nombre del change es el nombre de la rama**: `res-123-rechazo-solicitudes-duplicadas`.
+- **Commits y PR llevan la clave del ticket** (`RES-123`) para que Jira los enlace con los *smart commits*.
+- **La primera línea de `proposal.md` enlaza al ticket.** Puedes forzarlo con una regla en `rules.proposal` de [config.yaml](/guias/configuracion/).
+
+## Conectar el agente a Jira con MCP
+
+Atlassian ofrece un servidor MCP remoto oficial (Rovo MCP) con acceso a Jira, Confluence y otros productos. Cada persona se autentica con su cuenta mediante OAuth 2.1, así que no hay tokens en el repositorio.
+
+```json title=".mcp.json"
+{
+  "mcpServers": {
+    "atlassian": {
+      "type": "http",
+      "url": "https://mcp.atlassian.com/v2/mcp"
+    }
+  }
+}
+```
+
+En Claude Code, autentica desde `/mcp`. La autenticación con API token existe como alternativa para escenarios no interactivos, si tu administrador la habilita.
+
+<Aside type="caution" title="Revisado el 4 de octubre de 2026">
+El endpoint cambia con el tiempo. Según la guía oficial de Atlassian, el actual es `/v2/mcp`, y el antiguo `/v1/sse` dejó de soportarse tras el 30 de junio de 2026. Compruébalo en la [guía oficial](https://developer.atlassian.com/cloud/rovo-mcp/guides/getting-started/) antes de configurarlo.
+</Aside>
+
+## Del ticket a la propuesta
+
+Un comando propio, por ejemplo `/ticket-propose RES-123`, encadena los pasos habituales:
+
+1. Lee el ticket vía MCP, en solo lectura.
+2. Si los criterios son ambiguos, para y pregunta.
+3. Ejecuta `/opsx:propose` con el nombre `<clave>-<slug>`, enlaza el ticket y convierte cada criterio en un escenario.
+4. Presenta un resumen para revisión antes de pasar a `apply`.
+
+La plantilla completa está en [Plantillas](/referencia/plantillas/).
+
+## Estados: automatizaciones, no el agente
+
+No delegues las transiciones de estado en el modelo: es poco fiable y deja mala trazabilidad. Usa eventos de Git con *Jira Automation*:
+
+- Rama creada → **In Progress**.
+- Pull request fusionada → **Done**.
+
+Como mucho, permite al agente **comentar** en el ticket el enlace a la propuesta, con permisos mínimos.
+
+<Aside type="caution" title="Datos personales y RGPD">
+Los tickets pueden contener datos personales (capturas, correos, identificadores de clientes) que el servidor MCP enviaría al modelo. Revisa el tratamiento con tu delegado de protección de datos antes de conectarlo, empieza con permisos de solo lectura y no guardes secretos en el `.mcp.json` versionado.
+</Aside>
+
+## Si el ticket cambia después
+
+Si el equipo edita los criterios en Jira después de aprobar la propuesta, hay que actualizar el change (con `/opsx:update`) o crear uno nuevo. Decide cuál de los dos desde el primer día y déjalo escrito.
+
+## Siguiente paso
+
+[Integración con Azure DevOps](/equipo/azure-devops/)

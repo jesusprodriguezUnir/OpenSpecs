@@ -1,0 +1,81 @@
+---
+title: "Plan de adopción y riesgos"
+description: "Plan por fases para adoptar OpenSpec en un equipo: elección del piloto, definición de hecho, métricas, riesgos con su mitigación y checklist de arranque."
+openspecVersion: "1.14.0"
+lastReviewed: 2026-10-04
+level: avanzado
+sidebar:
+  order: 4
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Adoptar desarrollo guiado por specs sin añadir burocracia al flujo Scrum exige hacerlo de forma incremental y medible. Este plan lo divide en fases con un criterio de salida claro.
+
+## Plan por fases
+
+| Fase | Duración | Alcance | Criterio de salida |
+|---|---|---|---|
+| 0. Preparación | 1 semana | Formación, elección del piloto, revisión con protección de datos | El equipo tiene el modelo mental y el piloto está elegido |
+| 1. Piloto manual | Sprints 1–2 | `openspec init`, `CLAUDE.md`, `config.yaml`, convención de nombres, revisión de specs en la PR. **Sin MCP** | 5 o más changes archivados y feedback del equipo |
+| 2. Integración con el backlog | Sprint 3 | MCP de solo lectura y comando de ticket a propuesta | Propuestas generadas desde tickets sin retrabajo mayor |
+| 3. Automatización | Sprint 4 en adelante | [Validación en CI](/equipo/ci/), hook `Stop`, subagente verificador, estados por automatización | Pipeline obligatoria en `main` |
+| 4. Extensión | Posterior | Resto de proyectos y revisión automática en CI | Adopción en todos los repositorios activos |
+
+## Elegir el proyecto piloto
+
+Busca una aplicación en mantenimiento activo, con cobertura de tests razonable, un equipo motivado y un impacto de negocio medio (no crítico). Empieza con **cambios reales y pequeños** de la semana: un bug con regla de negocio, un endpoint nuevo con escenarios de error y un refactor.
+
+## Definition of Done
+
+Añade a la definición de hecho del equipo:
+
+- [ ] Change creado y propuesta revisada antes de implementar (o etiqueta `no-spec` justificada).
+- [ ] Cada escenario cubierto por un test automatizado.
+- [ ] Change archivado en la misma PR y `openspec/specs/` actualizado.
+- [ ] `openspec validate --strict` en verde.
+
+## Métricas para evaluar el piloto
+
+- **Retrabajo**: iteraciones de código tras la revisión. Se espera que baje.
+- **Defectos escapados** en historias con spec frente a las que no la tienen.
+- **Tiempo de ciclo** por historia: igual o menor tras la curva de aprendizaje.
+- **Cobertura de escenarios**: porcentaje con test; el objetivo es el 100 %.
+- **Coste en tokens** por historia.
+- **Percepción del equipo**, con una encuesta breve en la retrospectiva.
+
+## Riesgos y mitigaciones
+
+| Riesgo | Mitigación |
+|---|---|
+| Revisión de specs «de trámite»: se aprueba sin leer | Checklist de revisión, rotación de revisores y repaso en las retros |
+| Rellenar specs de todo el código existente | Política brownfield: solo specs de lo que se toca. Ver [proyectos existentes](/guias/brownfield/) |
+| Datos personales en tickets y código enviados al modelo | Revisión con protección de datos, plantilla de ticket sin datos reales y `deny` de ficheros sensibles |
+| Specs desalineadas con el código | Archive dentro de la PR, validación en la pipeline y subagente verificador |
+| El agente modifica el backlog | MCP en solo lectura y estados por automatizaciones nativas |
+| Versiones y tutoriales desactualizados | Versión fijada y `openspec update` controlado |
+| Rotura por actualizar OpenSpec | Versión fijada en CI y actualización en una rama dedicada |
+| Limitación del MCP remoto de Azure DevOps con Claude Code | Servidor local; revisa el estado periódicamente |
+| Cambios sin spec por urgencia | Etiqueta `no-spec` explícita y visible, con revisión periódica de su uso |
+| Coste de tokens | Modelo por fase y medición por historia |
+
+<Aside type="caution" title="Datos personales y RGPD">
+Antes de conectar un agente a tickets, código o repositorios con datos personales, informa a tu delegado de protección de datos y deja por escrito qué datos pueden llegar al modelo. Es la condición previa de la fase 2 del plan.
+</Aside>
+
+## Checklist de arranque del piloto
+
+- [ ] Node 20.19 o superior y OpenSpec instalado en los puestos del equipo.
+- [ ] Telemetría desactivada.
+- [ ] `openspec init` ejecutado con las herramientas que usa el equipo.
+- [ ] `CLAUDE.md` y `openspec/config.yaml` redactados con el stack y el dominio reales.
+- [ ] Convención de nombres acordada y documentada.
+- [ ] Plantilla de PR y Definition of Done actualizadas.
+- [ ] Delegado de protección de datos informado.
+- [ ] Primer change real elegido para el sprint.
+
+Las plantillas de PR y de ticket están en [Plantillas](/referencia/plantillas/).
+
+## Siguiente paso
+
+[Comandos de chat](/referencia/comandos-chat/)

@@ -1,0 +1,71 @@
+---
+title: "Otros agentes (Copilot, Cursor, Codex…)"
+description: "OpenSpec es agnóstico de herramienta: qué agentes soporta openspec init 1.14, qué se mantiene igual que con Claude Code y qué cambia."
+openspecVersion: "1.14.0"
+lastReviewed: 2026-10-04
+level: intermedio
+sidebar:
+  order: 2
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+OpenSpec no depende de un asistente concreto: el flujo (proposal, specs, design, tasks) vive en ficheros del repositorio, y el agente es quien los lee y los escribe. Lo que cambia entre herramientas es cómo se instalan los comandos y skills.
+
+## Qué agentes soporta
+
+`openspec init --tools` acepta `all`, `none` o una lista separada por comas. En la versión 1.14 la lista incluye, entre otras:
+
+- `claude` (Claude Code)
+- `codex`
+- `cursor`
+- `github-copilot`
+- `gemini`
+- `opencode`
+- `cline`
+- `amazon-q`
+- `kiro`
+- `roocode`
+- `devin` (`windsurf` se acepta como alias)
+- `agents`
+
+La lista completa y vigente está en la ayuda de tu versión:
+
+```bash
+openspec init --help
+```
+
+<Aside type="caution" title="La lista cambia entre versiones">
+Las herramientas soportadas crecen con cada versión de OpenSpec. No te fíes de listas copiadas: consulta `openspec init --help` en la versión que fijes en tu proyecto.
+</Aside>
+
+## Instalación en un proyecto
+
+Puedes configurar varios agentes a la vez si el equipo no usa el mismo:
+
+```bash
+openspec init --tools claude,cursor,github-copilot
+```
+
+Para GitHub Copilot existe además la opción `--copilot-cloud` (y su contraria `--no-copilot-cloud`), que prepara los ficheros del agente de codificación en la nube sin preguntar.
+
+## Qué es común a todos
+
+- **Los artefactos son los mismos.** `openspec/changes/`, `openspec/specs/` y `openspec/config.yaml` no dependen del agente.
+- **El flujo es el mismo.** Propose, apply, archive; la guía de [flujo /opsx](/guias/flujo-opsx/) vale para cualquiera.
+- **La validación es la misma.** `openspec validate --all --strict --no-interactive` funciona desde la CLI, la uses o no con un agente.
+
+## Qué cambia
+
+- **Dónde se instalan comandos y skills.** Cada herramienta tiene su propia carpeta o fichero de instrucciones; `openspec init` los genera y `openspec update` los regenera. No los edites a mano.
+- **Cómo se invocan.** Los comandos `/opsx:*` son una convención de las herramientas con comandos propios; en otras puedes pedir la misma acción en lenguaje natural o con el skill correspondiente. Comprueba en la documentación de tu agente cómo se lanzan.
+- **Permisos, hooks y subagentes.** El `settings.json`, el hook `Stop` y los subagentes de la [página de Claude Code](/agentes/claude-code/) son específicos de esa herramienta. Si tu agente no tiene equivalente, mueve la validación a la [CI](/equipo/ci/).
+- **Modelos.** El reparto por fase es una buena práctica, pero cómo se fija el modelo depende del agente.
+
+<Aside type="tip" title="Fuente de verdad">
+Para detalles de una herramienta concreta, manda la documentación oficial de OpenSpec y la de ese agente. Esta página solo recoge lo que es verificable con la propia CLI.
+</Aside>
+
+## Siguiente paso
+
+[Integración con Jira](/equipo/jira/)
