@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { expectNoSevereViolations } from './axe';
-import { scriptExtras, type ScriptRef } from './script-budget';
+import { executableScripts, scriptExtras, type ScriptRef } from './script-budget';
 
 const REPO_URL = 'https://github.com/jesusprodriguezUnir/OpenSpecs';
 const ARCHIVE_DIR = 'openspec/changes/archive';
@@ -20,7 +20,11 @@ const archived = folders(ARCHIVE_DIR, 'proposal.md')
 const domains = folders(SPECS_DIR, 'spec.md').sort();
 
 const scriptsOf = (page: Page): Promise<ScriptRef[]> =>
-	page.$$eval('script', (nodes) => nodes.map((n) => ({ src: n.getAttribute('src'), content: n.textContent ?? '' })));
+	page
+		.$$eval('script', (nodes) =>
+			nodes.map((n) => ({ src: n.getAttribute('src'), content: n.textContent ?? '', type: n.getAttribute('type') })),
+		)
+		.then(executableScripts);
 
 test.describe('como-se-hizo', () => {
 	test('Scenario: Changes ordenados del más reciente al más antiguo', async ({ page }) => {

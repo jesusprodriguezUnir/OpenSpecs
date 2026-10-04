@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { scriptExtras, type ScriptRef } from './script-budget';
+import { executableScripts, scriptExtras, type ScriptRef } from './script-budget';
 
 const HERO = '.hero';
 const PRIMARY = '/empieza/primer-cambio/';
@@ -15,8 +15,8 @@ const journeyCard = (page: Page, name: string) =>
 
 const scriptsOf = (page: Page): Promise<ScriptRef[]> =>
 	page.$$eval('script', (nodes) =>
-		nodes.map((n) => ({ src: n.getAttribute('src'), content: n.textContent ?? '' })),
-	);
+		nodes.map((n) => ({ src: n.getAttribute('src'), content: n.textContent ?? '', type: n.getAttribute('type') })),
+	).then(executableScripts);
 
 test.describe('landing', () => {
 	test.beforeEach(async ({ page }) => {

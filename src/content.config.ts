@@ -2,12 +2,12 @@ import { defineCollection } from 'astro:content';
 import { file, glob, type Loader } from 'astro/loaders';
 import { docsLoader } from '@astrojs/starlight/loaders';
 import { docsSchema } from '@astrojs/starlight/schema';
-import { assertRequiredFields, guideMetadataSchema } from './lib/content-rules';
+import { guideMetadataSchema, validateGuideFrontmatter } from './lib/content-rules';
 import { resourceSchema } from './lib/resources-schema';
 
 /**
  * Wraps Starlight's docs loader so section-required metadata is checked with the entry id
- * (a schema superRefine does not receive it). A missing field throws and fails the build.
+ * (a schema superRefine does not receive it). A missing field or an out-of-range description throws and fails the build.
  */
 function docsLoaderWithRequiredMetadata(): Loader {
 	const inner = docsLoader();
@@ -17,7 +17,8 @@ function docsLoaderWithRequiredMetadata(): Loader {
 			inner.load({
 				...context,
 				parseData: async (props) => {
-					assertRequiredFields(props.id, props.data as Record<string, unknown>);
+					const issues = validateGuideFrontmatter(props.id, props.data as Record<string, unknown>);
+					if (issues.length > 0) throw new Error(issues.join('\n'));
 					return context.parseData(props);
 				},
 			}),
