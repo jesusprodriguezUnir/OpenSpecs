@@ -16,7 +16,17 @@ export default defineConfig({
 			},
 			components: {
 				PageTitle: "./src/components/overrides/PageTitle.astro",
+				Footer: "./src/components/overrides/Footer.astro",
 			},
+			// Vercel Web Analytics, same origin and cookieless (w11).
+			head: [
+				{
+					tag: 'script',
+					content:
+						'window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };',
+				},
+				{ tag: 'script', attrs: { defer: true, src: '/_vercel/insights/script.js' } },
+			],
 			routeMiddleware: './src/route-middleware.ts',
 			customCss: ['./src/styles/custom.css'],
 			sidebar: [
