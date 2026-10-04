@@ -12,8 +12,8 @@
 
 ## 3. Vercel (manual, se documenta en la PR)
 
-- [ ] 3.1 Enlazar el proyecto de Vercel al repositorio, verificar que la PR recibe un preview ("Scenario: Preview por PR", verificación manual registrada en la descripción de la PR) y ejecutar el smoke test con `PREVIEW_URL`
-- [ ] 3.2 Definir `SITE_URL` con la URL `*.vercel.app` de producción en las variables de entorno de Vercel
+- [x] 3.1 Enlazar el proyecto de Vercel al repositorio, verificar que la PR recibe un preview ("Scenario: Preview por PR", verificación manual registrada en la descripción de la PR) y ejecutar el smoke test con `PREVIEW_URL`
+- [x] 3.2 Definir `SITE_URL` con la URL `*.vercel.app` de producción en las variables de entorno de Vercel
 
 ## 4. Cierre
 
