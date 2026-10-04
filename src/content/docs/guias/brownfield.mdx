@@ -1,0 +1,51 @@
+---
+title: "Proyectos existentes (brownfield)"
+description: "Cómo introducir OpenSpec en un proyecto que ya existe: sin documentar todo de golpe, con un piloto acotado, cambios pequeños y los riesgos habituales con su mitigación."
+openspecVersion: "1.14.0"
+lastReviewed: 2026-10-04
+level: intermedio
+sidebar:
+  order: 4
+---
+
+OpenSpec está pensado para proyectos que ya tienen código. La clave es no intentar describir todo el sistema antes de empezar: las specs crecen change a change, solo en las zonas que tocas.
+
+## Sin documentación masiva
+
+- **No hagas backfilling**: escribir specs de todo el sistema de entrada cuesta semanas, se desactualiza y nadie lo revisa.
+- Cada change describe solo el comportamiento que añade o modifica. Al archivarlo, ese fragmento pasa a `openspec/specs/`.
+- Con el tiempo, las zonas con más actividad quedan bien especificadas; las que nadie toca no necesitan spec.
+
+## Elegir un piloto
+
+- Un equipo pequeño y un repositorio con actividad frecuente.
+- Un área de negocio acotada, por ejemplo el módulo de reservas de salas.
+- Alguien que haga de referente y revise las primeras propuestas.
+- Una duración cerrada (unas semanas) con revisión al final.
+
+## Primeros changes
+
+1. Empieza por changes **pequeños y reales**: un bugfix o una funcionalidad menor, no una épica.
+2. Antes de proponer, usa `/opsx:explore` para que el agente lea el código del área afectada.
+3. Revisa con atención la primera delta spec: es la que fija el estilo de las siguientes.
+4. Archiva dentro de la misma PR y comprueba que `openspec/specs/` refleja lo esperado.
+
+## Riesgos y mitigaciones
+
+| Riesgo | Mitigación |
+|---|---|
+| Specs que se desactualizan respecto al código | Archive obligatorio dentro de la PR; `openspec validate` en CI. |
+| Sobrecarga de proceso en cambios triviales | Cambios editoriales o triviales sin change; receta rápida para lo pequeño. |
+| El agente inventa comportamiento que no existe | `/opsx:explore` antes de proponer y revisión humana de las specs. |
+| Specs demasiado ligadas a la implementación | Revisión con la checklist de [Escribir specs](/guias/formato-de-specs/). |
+| Abandono tras el piloto | Métricas sencillas y retrospectiva al cerrar el piloto. |
+
+## Definition of Done: añadidos
+
+- El change está archivado en la misma PR y `openspec validate --all --strict` pasa.
+- Cada escenario nuevo o modificado tiene un test cuyo nombre contiene `Scenario: <nombre>`.
+- Las delta specs describen comportamiento, no implementación.
+
+## Siguiente paso
+
+[config.yaml y schemas personalizados](/guias/configuracion/)

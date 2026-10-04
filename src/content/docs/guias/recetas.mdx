@@ -1,0 +1,85 @@
+---
+title: "Recetas: feature, bugfix, refactor, paralelo"
+description: "Siete recetas prácticas para combinar los comandos /opsx según el tipo de trabajo: funcionalidad pequeña, bugfix, exploración, cambios en paralelo, refactor, control incremental y aprendizaje."
+openspecVersion: "1.14.0"
+lastReviewed: 2026-10-04
+level: intermedio
+sidebar:
+  order: 3
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+No todos los cambios necesitan el mismo recorrido. Estas recetas parten del flujo completo y lo ajustan al tipo de trabajo; los ejemplos usan una aplicación de gestión de reservas.
+
+## Receta 1: funcionalidad pequeña (camino rápido)
+
+1. `/opsx:propose cancelacion-reservas`
+2. Revisa proposal y specs.
+3. `/opsx:apply`
+4. `/opsx:archive`
+
+## Receta 2: bugfix
+
+Igual que la receta 1, pero la propuesta se formula como **comportamiento correcto** y la delta spec usa **MODIFIED** sobre el requisito afectado. El bug queda documentado como requisito, con un escenario que lo cubre.
+
+```text title="Chat"
+/opsx:propose fix-reserva-duplicada
+```
+
+## Receta 3: explorar primero
+
+Para cambios con incertidumbre:
+
+1. `/opsx:explore` sobre el área afectada. En Claude Code encaja con el *plan mode* (Shift+Tab), que impide editar mientras investigas.
+2. Cuando haya claridad, `/opsx:propose`: la propuesta aprovecha el contexto de la exploración.
+
+## Receta 4: cambios en paralelo
+
+Cada change vive en su propia carpeta, así que no hay conflictos entre ellos. Para retomar uno concreto: `/opsx:apply exportacion-pdf`. Para trabajar en paralelo de verdad, combina OpenSpec con **git worktrees** (un directorio y una rama por change):
+
+<Tabs syncKey="shell">
+  <TabItem label="PowerShell">
+```powershell title="PowerShell"
+git worktree add ..\reservas-exportacion -b exportacion-pdf
+openspec list
+```
+  </TabItem>
+  <TabItem label="bash">
+```bash title="bash"
+git worktree add ../reservas-exportacion -b exportacion-pdf
+openspec list
+```
+  </TabItem>
+</Tabs>
+
+`openspec list` muestra los changes activos y su progreso.
+
+## Receta 5: refactor sin cambio de comportamiento
+
+Propuesta y tasks, sin delta specs: el comportamiento no cambia, así que no hay nada que fusionar. Archiva saltando la actualización de specs:
+
+<Tabs syncKey="shell">
+  <TabItem label="PowerShell">
+```powershell title="PowerShell"
+openspec archive refactor-repositorio-reservas --skip-specs
+```
+  </TabItem>
+  <TabItem label="bash">
+```bash title="bash"
+openspec archive refactor-repositorio-reservas --skip-specs
+```
+  </TabItem>
+</Tabs>
+
+## Receta 6: control incremental (cambios grandes)
+
+Con el perfil ampliado: `/opsx:new` → `/opsx:continue` (un artefacto cada vez, revisando entre medias) → `/opsx:ff` cuando el resto ya está claro.
+
+## Receta 7: aprender sobre el código real
+
+`/opsx:onboard` (perfil ampliado) guía un change completo sobre tu propio repositorio. Es la forma más rápida de que alguien nuevo vea el ciclo entero con código que conoce.
+
+## Siguiente paso
+
+[Proyectos existentes (brownfield)](/guias/brownfield/)
