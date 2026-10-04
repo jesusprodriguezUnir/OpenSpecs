@@ -1,0 +1,99 @@
+---
+/**
+ * Archived OpenSpec changes and current spec domains, rendered at build time from the repository.
+ * No client JavaScript.
+ */
+import { getCollection } from 'astro:content';
+import { buildHistoryView, changeFolderUrl, specFileUrl } from '../lib/openspec-history';
+
+const view = buildHistoryView(await getCollection('changelog'), await getCollection('specDomains'));
+---
+
+<div class="history not-content">
+	<section aria-labelledby="changes-archivados">
+		<h2 id="changes-archivados">Changes archivados</h2>
+		{
+			view.showChangesEmpty ? (
+				<p class="history-empty">
+					Todavía no hay changes archivados. Cuando se archive el primero con <code>/opsx:archive</code>,
+					aparecerá aquí.
+				</p>
+			) : (
+				<ol class="history-changes">
+					{view.changes.map((change) => (
+						<li>
+							<div class="history-head">
+								<time datetime={change.date}>{change.date}</time>
+								<a href={changeFolderUrl(change.folder)} rel="noopener noreferrer">
+									{change.name}
+								</a>
+							</div>
+							{change.summary && <p class="history-summary">{change.summary}</p>}
+						</li>
+					))}
+				</ol>
+			)
+		}
+	</section>
+
+	<section aria-labelledby="dominios-de-spec">
+		<h2 id="dominios-de-spec">Dominios de spec actuales</h2>
+		{
+			view.showDomainsEmpty ? (
+				<p class="history-empty">
+					Todavía no hay specs actuales. Se crean al archivar un change que añade requisitos.
+				</p>
+			) : (
+				<ul class="history-domains">
+					{view.domains.map((entry) => (
+						<li>
+							<a href={specFileUrl(entry.domain)} rel="noopener noreferrer">
+								{entry.domain}
+							</a>
+							<span class="history-meta">
+								<span class="requirements-count">{entry.requirements}</span>{' '}
+								{entry.requirements === 1 ? 'requisito' : 'requisitos'}
+							</span>
+						</li>
+					))}
+				</ul>
+			)
+		}
+	</section>
+</div>
+
+<style>
+	.history h2 {
+		font-size: var(--sl-text-h3);
+		margin-top: 1.5rem;
+	}
+	.history ol,
+	.history ul {
+		list-style: none;
+		padding: 0;
+		margin: 0.5rem 0 0;
+	}
+	.history li {
+		padding: 0.5rem 0;
+		border-bottom: 1px solid var(--sl-color-hairline);
+	}
+	.history-head {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem 0.75rem;
+		align-items: baseline;
+	}
+	.history-head time,
+	.history-meta {
+		color: var(--sl-color-gray-3);
+		font-size: var(--sl-text-sm);
+	}
+	.history-domains li {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem 0.75rem;
+	}
+	.history-summary {
+		margin: 0.25rem 0 0;
+	}
+</style>
