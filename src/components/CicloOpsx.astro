@@ -1,0 +1,91 @@
+---
+// Inline SVG of the /opsx cycle. No client script; colors follow the Starlight theme.
+const steps = ['explore', 'propose', 'apply', 'archive'];
+const titleId = 'ciclo-opsx-title';
+const descId = 'ciclo-opsx-desc';
+const boxWidth = 130;
+const gap = 40;
+const width = steps.length * boxWidth + (steps.length - 1) * gap;
+---
+
+<figure class="ciclo-opsx not-content">
+	<svg
+		role="img"
+		aria-labelledby={titleId}
+		aria-describedby={descId}
+		viewBox={`0 0 ${width} 150`}
+		xmlns="http://www.w3.org/2000/svg"
+	>
+		<title id={titleId}>Ciclo de trabajo /opsx de OpenSpec</title>
+		<desc id={descId}>
+			Cuatro pasos en orden: explore para pensar el cambio, propose para escribir propuesta,
+			specs, diseño y tareas, apply para implementarlo y archive para fusionar las specs y
+			cerrar el cambio. Después se vuelve a empezar con el siguiente cambio.
+		</desc>
+		<defs>
+			<marker id="ciclo-opsx-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+				<path d="M0 0 L10 5 L0 10 z" class="arrow-head"></path>
+			</marker>
+		</defs>
+		{
+			steps.map((step, i) => {
+				const x = i * (boxWidth + gap);
+				return (
+					<g>
+						<rect x={x + 1} y="21" width={boxWidth - 2} height="58" rx="10" class="box" />
+						<text x={x + boxWidth / 2} y="56" text-anchor="middle" class="label">
+							{`/opsx:${step}`}
+						</text>
+						{i < steps.length - 1 && (
+							<line x1={x + boxWidth} y1="50" x2={x + boxWidth + gap - 2} y2="50" class="arrow" marker-end="url(#ciclo-opsx-arrow)" />
+						)}
+					</g>
+				);
+			})
+		}
+		<path
+			d={`M ${width - boxWidth / 2} 80 V 125 H ${boxWidth / 2} V 82`}
+			class="arrow back"
+			marker-end="url(#ciclo-opsx-arrow)"
+		></path>
+		<text x={width / 2} y="143" text-anchor="middle" class="note">siguiente cambio</text>
+	</svg>
+</figure>
+
+<style>
+	.ciclo-opsx {
+		margin-block: 2rem;
+	}
+	svg {
+		width: 100%;
+		height: auto;
+		max-width: 46rem;
+		display: block;
+		margin-inline: auto;
+	}
+	.box {
+		fill: var(--sl-color-accent-low);
+		stroke: var(--sl-color-accent);
+		stroke-width: 2;
+	}
+	.label {
+		fill: var(--sl-color-white);
+		font-family: var(--sl-font-mono);
+		font-size: 15px;
+	}
+	.arrow {
+		stroke: var(--sl-color-gray-3);
+		stroke-width: 2;
+		fill: none;
+	}
+	.back {
+		stroke-dasharray: 6 4;
+	}
+	.arrow-head {
+		fill: var(--sl-color-gray-3);
+	}
+	.note {
+		fill: var(--sl-color-gray-2);
+		font-size: 13px;
+	}
+</style>
