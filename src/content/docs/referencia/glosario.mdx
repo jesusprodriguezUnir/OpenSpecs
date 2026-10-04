@@ -1,0 +1,82 @@
+---
+title: "Glosario"
+description: "Glosario de OpenSpec y del desarrollo guiado por specs: spec, change, delta spec, archive, schema, perfil, store, MCP y otros términos, cada uno con un ancla estable."
+openspecVersion: "1.14.0"
+lastReviewed: 2026-10-04
+sidebar:
+  order: 4
+---
+
+Cada término tiene un ancla estable derivada de su nombre (en minúsculas, sin tildes y con guiones), por ejemplo `/referencia/glosario/#delta-spec`. Úsala para enlazar desde otras páginas.
+
+## Conceptos de OpenSpec
+
+### SDD
+
+*Spec-Driven Development*, desarrollo guiado por specs: una especificación estructurada guía la implementación del agente de IA.
+
+### Spec
+
+Documento en `openspec/specs/<dominio>/spec.md` que describe el comportamiento actual del sistema. Es la fuente de verdad.
+
+### Requirement
+
+Regla de comportamiento dentro de una spec, redactada con palabras normativas como SHALL o MUST.
+
+### Scenario
+
+Caso concreto de un requirement, con la forma WHEN / THEN (y opcionalmente GIVEN). Cada scenario debe tener un test automatizado.
+
+### Change
+
+Carpeta en `openspec/changes/<nombre>/` con una propuesta de cambio: proposal, delta specs, design y tasks.
+
+### Delta spec
+
+Fragmento de spec dentro de un change que marca requisitos como ADDED, MODIFIED o REMOVED respecto a la spec principal.
+
+### Proposal
+
+Artefacto `proposal.md` de un change: intención, alcance, enfoque y enlace al ticket de origen.
+
+### Design
+
+Artefacto `design.md` de un change con las decisiones técnicas y las alternativas descartadas.
+
+### Tasks
+
+Artefacto `tasks.md` de un change: checklist de implementación que el agente marca al completar cada tarea.
+
+### Archive
+
+Operación que fusiona las delta specs en `openspec/specs/` y mueve el change a `openspec/changes/archive/`.
+
+### Schema
+
+Definición de qué artefactos tiene un change y en qué orden se generan. El schema por defecto es `spec-driven`.
+
+### Perfil
+
+Conjunto de workflows que `openspec init` genera como comandos de chat: el perfil core o uno personalizado con `openspec config profile`.
+
+### Store
+
+Repositorio OpenSpec independiente registrado en la máquina, útil para compartir specs entre varios repositorios.
+
+## Entorno y equipo
+
+### MCP
+
+*Model Context Protocol*: protocolo para que el agente de IA acceda a herramientas externas como Jira o Azure DevOps.
+
+### Skill
+
+Instrucciones empaquetadas que el agente carga cuando la tarea encaja; `openspec init` genera una por cada comando de chat del perfil.
+
+### Brownfield
+
+Proyecto existente, frente a *greenfield* (proyecto desde cero). En OpenSpec solo se escriben specs de lo que se toca.
+
+## Siguiente paso
+
+[FAQ](/referencia/faq/)

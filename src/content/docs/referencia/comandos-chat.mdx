@@ -1,0 +1,61 @@
+---
+title: "Comandos de chat /opsx:*"
+description: "Referencia de los comandos de chat /opsx:* que genera openspec init en OpenSpec 1.14: qué hace cada uno, cuándo usarlo y qué workflows añade el perfil ampliado."
+openspecVersion: "1.14.0"
+lastReviewed: 2026-10-04
+sidebar:
+  order: 1
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Los comandos `/opsx:*` se escriben en el chat de tu asistente de IA, no en la terminal. `openspec init` los genera para la herramienta elegida; con Claude Code quedan en `.claude/commands/opsx/` junto a sus skills en `.claude/skills/`. Esta página recoge los que genera la versión 1.14.0 con el perfil **core**.
+
+<Aside type="note">
+No edites a mano los ficheros generados: `openspec update` los regenera al subir de versión y sobrescribe tus cambios.
+</Aside>
+
+## Comandos del perfil core
+
+| Comando | Qué hace | Cuándo usarlo |
+|---|---|---|
+| `/opsx:explore` | Modo exploración: investiga el problema y el código sin escribir artefactos ni código. | Antes de proponer, cuando hay incertidumbre. |
+| `/opsx:propose <nombre>` | Crea el change y genera proposal, delta specs, design y tasks en un solo paso. | Para iniciar cualquier cambio de comportamiento. |
+| `/opsx:apply [<nombre>]` | Implementa las tareas de `tasks.md` y las marca al completarlas. | Cuando la propuesta está revisada y aprobada. |
+| `/opsx:update [<nombre>]` | *(Experimental)* Revisa los artefactos de planificación de un change y los mantiene coherentes entre sí. No toca código. | Tras el feedback de la revisión de la propuesta. |
+| `/opsx:sync [<nombre>]` | Fusiona las delta specs del change en `openspec/specs/` sin archivarlo. | Cuando necesitas las specs principales al día antes de archivar. |
+| `/opsx:archive [<nombre>]` | Fusiona las delta specs y mueve el change a `openspec/changes/archive/`. | Al terminar, dentro de la misma PR que el código. |
+
+### Ejemplo en el dominio de reservas
+
+```text
+/opsx:explore ¿Qué pasa hoy si dos clientes reservan la misma franja?
+/opsx:propose rechazo-reservas-solapadas
+/opsx:apply rechazo-reservas-solapadas
+/opsx:archive rechazo-reservas-solapadas
+```
+
+## Diferencias con la KB (1.13)
+
+- `/opsx:sync` ya no «sincroniza el estado»: fusiona las delta specs en las specs principales sin archivar.
+- `/opsx:update` es nuevo en 1.14.
+- Los tutoriales anteriores a la 1.x usaban `/openspec:proposal` y `project.md`; hoy son los comandos `/opsx:*` y `openspec/config.yaml`.
+
+## Workflows del perfil ampliado
+
+`openspec init` con el perfil core no genera más comandos. Con `openspec config profile` puedes activar workflows adicionales; cada uno añade su comando de chat con el mismo prefijo:
+
+| Workflow | Qué hace |
+|---|---|
+| `new` | Crea el change vacío, sin generar artefactos. |
+| `continue` | Genera el siguiente artefacto pendiente, uno cada vez. |
+| `ff` | Genera de una vez todos los artefactos que faltan. |
+| `verify` | Comprueba que la implementación cumple specs, design y tasks. |
+| `bulk-archive` | Archiva varios changes terminados a la vez. |
+| `onboard` | Tutorial guiado que recorre un change completo sobre tu propio código. |
+
+El uso detallado de estos workflows está en [Flujo /opsx de principio a fin](/guias/flujo-opsx/).
+
+## Siguiente paso
+
+[CLI openspec](/referencia/cli/)

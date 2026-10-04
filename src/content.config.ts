@@ -1,8 +1,9 @@
 import { defineCollection } from 'astro:content';
-import type { Loader } from 'astro/loaders';
+import { file, type Loader } from 'astro/loaders';
 import { docsLoader } from '@astrojs/starlight/loaders';
 import { docsSchema } from '@astrojs/starlight/schema';
 import { assertRequiredFields, guideMetadataSchema } from './lib/content-rules';
+import { resourceSchema } from './lib/resources-schema';
 
 /**
  * Wraps Starlight's docs loader so section-required metadata is checked with the entry id
@@ -27,5 +28,10 @@ export const collections = {
 	docs: defineCollection({
 		loader: docsLoaderWithRequiredMetadata(),
 		schema: docsSchema({ extend: guideMetadataSchema }),
+	}),
+	// External links listed on /recursos/. Each entry declares an explicit id so build errors name it.
+	resources: defineCollection({
+		loader: file('src/data/resources.yaml'),
+		schema: resourceSchema,
 	}),
 };

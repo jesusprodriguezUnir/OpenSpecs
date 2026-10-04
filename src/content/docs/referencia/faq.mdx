@@ -1,0 +1,88 @@
+---
+title: "FAQ"
+description: "Preguntas frecuentes sobre OpenSpec 1.14: specs frente a changes, cuándo archivar, refactors y bugs, Jira y Azure DevOps, idioma de las specs, telemetría y cómo aprender rápido."
+openspecVersion: "1.14.0"
+lastReviewed: 2026-10-04
+sidebar:
+  order: 5
+---
+
+## Empezar
+
+### ¿Tengo que documentar todo el sistema antes de empezar?
+
+No. OpenSpec está pensado también para proyectos existentes: solo se escriben specs de lo que se va a cambiar. La documentación crece con cada change archivado. Más en [proyectos existentes](/guias/brownfield/).
+
+### ¿Qué diferencia hay entre `openspec/specs` y `openspec/changes`?
+
+`specs/` describe cómo se comporta el sistema hoy (fuente de verdad). `changes/` contiene propuestas en curso, expresadas como deltas (ADDED / MODIFIED / REMOVED). Al archivar un change, sus deltas se fusionan en `specs/`.
+
+### ¿Cómo lo aprendo rápido?
+
+Sigue [tu primer cambio](/empieza/primer-cambio/) en un repositorio de pruebas y consulta [Recursos](/recursos/). El workflow `onboard` del perfil ampliado guía un change completo sobre tu propio código.
+
+## Flujo de trabajo
+
+### ¿Cuándo se archiva un change?
+
+Antes del merge, dentro de la misma PR, para que código y specs entren juntos en `main`.
+
+### ¿Qué pasa con los refactors que no cambian comportamiento?
+
+Se crea un change con propuesta y tareas, sin delta specs, y se archiva con `openspec archive <change> --skip-specs`.
+
+### ¿Y los bugs?
+
+Se proponen como comportamiento correcto con un requisito MODIFIED. El bug queda documentado y protegido por un test.
+
+### ¿Qué hago si la revisión pide cambios en la propuesta?
+
+Itera sobre el mismo change. En 1.14, `/opsx:update` revisa los artefactos de planificación y los mantiene coherentes entre sí sin tocar código.
+
+### ¿Cómo evito que las specs se queden desactualizadas?
+
+Archive en la PR, `openspec validate --all --strict --no-interactive` en la pipeline, hook `Stop` en Claude Code, subagente verificador y una regla en `CLAUDE.md` que prohíba editar `specs/` directamente.
+
+### ¿Qué hago con un cambio urgente sin tiempo para specs?
+
+Etiqueta `no-spec` visible en la PR. Revisa su uso en las retrospectivas; si se abusa, el proceso se erosiona.
+
+### ¿OpenSpec sustituye a los tests?
+
+No. Cada Scenario debe tener un test automatizado. Las specs dicen qué debe pasar; los tests lo garantizan.
+
+## Equipo y herramientas
+
+### ¿Qué modelos de IA puedo usar?
+
+OpenSpec es agnóstico: depende de la herramienta. `openspec init --tools` admite más de 40 asistentes. Con Claude Code se suele usar un modelo más capaz para explorar, proponer y verificar, y otro más rápido para implementar.
+
+### ¿Funciona con Jira y con Azure DevOps?
+
+Sí. El backlog guarda el qué y el estado; OpenSpec, el cómo. El agente lee los tickets por MCP y los estados se actualizan con automatizaciones nativas basadas en eventos de Git. Más en [Jira](/equipo/jira/) y [Azure DevOps](/equipo/azure-devops/).
+
+### ¿Debe el agente mover los tickets de estado?
+
+No. Mejor automatizaciones de Jira o Azure DevOps disparadas por rama, PR y merge. El agente, como mucho, comenta en el ticket.
+
+### ¿Duplico las sub-tasks en Jira y en `tasks.md`?
+
+No. Elige una sola fuente; recomendamos `tasks.md`.
+
+### ¿Qué pasa si front y back están en repositorios distintos?
+
+Puedes guardar las specs en el repositorio que define el contrato (normalmente el backend) o usar stores: repositorios OpenSpec independientes que se gestionan con `openspec store`.
+
+### ¿En qué idioma escribo las specs?
+
+Palabras normativas (SHALL/MUST, GIVEN/WHEN/THEN) en inglés; términos de dominio en el idioma del negocio. Con `openspec init --language` los artefactos nuevos se generan en ese idioma; si ya tienes `config.yaml`, indícalo en `context`.
+
+## Privacidad
+
+### ¿Envía datos OpenSpec a algún sitio?
+
+Solo telemetría anónima (nombre de comando y versión), desactivable con `openspec config set telemetry.enabled false` o la variable `OPENSPEC_TELEMETRY=0`. En CI se desactiva sola. El contenido de specs y código lo procesa el modelo de IA de la herramienta que uses, no OpenSpec.
+
+## Siguiente paso
+
+[Documentación, vídeos y comunidad](/recursos/)
