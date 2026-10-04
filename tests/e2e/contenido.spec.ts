@@ -12,7 +12,7 @@ test.describe('contenido', () => {
 		await expect(header.locator('[data-meta="level"] dd')).toHaveText('Inicio');
 		await expect(header.locator('[data-meta="duration"] dd')).toHaveText('30 min');
 		await expect(header.locator('[data-meta="openspec-version"] dd')).toHaveText('1.14.0');
-		await expect(header.locator('[data-meta="last-reviewed"] dd')).toHaveText('3 de octubre de 2026');
+		await expect(header.locator('[data-meta="last-reviewed"] dd')).toHaveText('4 de octubre de 2026');
 	});
 
 	test('Scenario: Guía sin duración', async ({ page }) => {

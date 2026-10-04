@@ -1,0 +1,119 @@
+---
+title: "Conceptos: specs, changes y deltas"
+description: "Los tres conceptos que sostienen OpenSpec: specs como fuente de verdad, changes como unidad de trabajo y deltas ADDED, MODIFIED y REMOVED, con ejemplos de gestión de reservas."
+openspecVersion: "1.14.0"
+lastReviewed: 2026-10-04
+level: inicio
+sidebar:
+  order: 2
+---
+
+OpenSpec se reduce a tres conceptos: **specs** (cómo se comporta el sistema hoy), **changes** (una modificación en curso) y **deltas** (lo que un change altera de las specs). Los ejemplos de esta página usan un dominio neutro: la gestión de reservas.
+
+## Specs: la fuente de verdad
+
+Las specs viven en `openspec/specs/<dominio>/spec.md` y se organizan **por dominio funcional** (`reservas`, `pagos`), no por capas técnicas. Describen comportamiento observable, no implementación: nada de clases o tablas, salvo que formen parte del contrato.
+
+- Cada **Requirement** declara un comportamiento con lenguaje normativo (`SHALL` / `MUST`).
+- Cada requisito tiene uno o más **Scenario** en formato `GIVEN` / `WHEN` / `THEN`.
+
+```markdown
+# Reservas
+
+## Requirements
+
+### Requirement: Alta de reserva
+The system SHALL allow a customer to create a reservation for an available time slot.
+
+#### Scenario: Alta correcta
+- GIVEN an available time slot
+- WHEN the customer submits a reservation for that slot
+- THEN the system confirms the reservation
+- AND the slot is no longer available
+
+#### Scenario: Franja no disponible
+- GIVEN a time slot already reserved
+- WHEN the customer submits a reservation for that slot
+- THEN the system rejects it with code `SLOT_NOT_AVAILABLE`
+```
+
+Las palabras normativas y las palabras clave de los escenarios van en inglés para que el validador y el agente las reconozcan. Los nombres de requisito y de escenario y los términos de dominio pueden ir en tu idioma, siempre con un criterio uniforme en todo el repositorio.
+
+## Changes: la unidad de trabajo
+
+Un change es una carpeta en `openspec/changes/<nombre>/` con todo lo necesario para proponer, revisar e implementar una modificación:
+
+| Artefacto | Contenido | Quién lo revisa |
+|---|---|---|
+| `proposal.md` | Intención, alcance y enfoque | Producto / responsable técnico |
+| `specs/` | Delta specs con escenarios | Todo el equipo (es la parte clave de la revisión) |
+| `design.md` | Decisiones técnicas | Responsable técnico |
+| `tasks.md` | Checklist de implementación con progreso | Quien implementa |
+
+Varios changes pueden convivir en paralelo sin pisarse, porque cada uno vive en su carpeta. Cuando se completa, `/opsx:archive` lo mueve a `openspec/changes/archive/`.
+
+## Deltas: lo que cambia
+
+Dentro de un change, las specs no se reescriben enteras: solo se declara qué se añade, qué se modifica y qué se elimina, en `openspec/changes/<nombre>/specs/<dominio>/spec.md`.
+
+### ADDED
+
+Un requisito nuevo.
+
+```markdown
+## ADDED Requirements
+
+### Requirement: Cancelación de reserva
+The system SHALL allow a customer to cancel a reservation up to 24 hours before its start.
+
+#### Scenario: Cancelación a tiempo
+- GIVEN a reservation starting in more than 24 hours
+- WHEN the customer cancels it
+- THEN the reservation is marked as cancelled
+- AND the slot becomes available again
+```
+
+### MODIFIED
+
+Un requisito existente cuyo comportamiento cambia. Se reescribe **completo**, no solo la diferencia. Es la forma natural de documentar un bug: se describe el comportamiento correcto, no «arreglar X».
+
+```markdown
+## MODIFIED Requirements
+
+### Requirement: Alta de reserva
+The system SHALL allow a customer to create a reservation for an available time slot **starting in the future**.
+
+#### Scenario: Franja en el pasado
+- GIVEN a time slot that already started
+- WHEN the customer submits a reservation for that slot
+- THEN the system rejects it with code `SLOT_IN_THE_PAST`
+```
+
+### REMOVED
+
+Un comportamiento que desaparece. Exige motivo y migración.
+
+```markdown
+## REMOVED Requirements
+
+### Requirement: Reserva por correo electrónico
+**Reason**: sustituido por el formulario web.
+**Migration**: las reservas pendientes por correo se migran manualmente antes del despliegue.
+```
+
+## Del delta a la spec principal
+
+Al ejecutar `/opsx:archive`, OpenSpec fusiona los deltas en `openspec/specs/` y archiva el change. Así la fuente de verdad solo cambia a través de un change revisado.
+
+Un refactor que no altera el comportamiento no lleva delta: se archiva con `openspec archive <cambio> --skip-specs`.
+
+## Reglas prácticas
+
+1. **Un escenario por regla de negocio y por caso de error.** Los errores también son comportamiento.
+2. **Códigos de error estables** en lugar de mensajes literales: los clientes y los tests dependen de ellos.
+3. **Cada escenario, un test automatizado.** La spec sin test es un deseo.
+4. **No hagas backfilling masivo.** Las specs crecen change a change.
+
+## Siguiente paso
+
+[Instalación](/empieza/instalacion/)

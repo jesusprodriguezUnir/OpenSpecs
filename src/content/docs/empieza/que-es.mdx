@@ -1,0 +1,70 @@
+---
+title: "¿Qué es OpenSpec?"
+description: "OpenSpec es un framework ligero de spec-driven development: humanos y agentes de IA acuerdan qué construir antes de escribir código, y ese acuerdo vive en Git."
+openspecVersion: "1.14.0"
+lastReviewed: 2026-10-04
+level: inicio
+sidebar:
+  order: 1
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+OpenSpec es un framework de código abierto (licencia MIT, desarrollado por Fission-AI) para hacer **spec-driven development** con asistentes de IA de programación. Su objetivo es concreto: que personas y agentes se pongan de acuerdo sobre **qué** hay que construir antes de escribir código, y que ese acuerdo quede versionado en el repositorio.
+
+## El problema que resuelve
+
+Sin especificaciones, el trabajo con agentes se apoya en prompts vagos. El agente rellena huecos con suposiciones, el conocimiento se pierde en el historial del chat y nadie puede revisar la intención antes de ver el código.
+
+OpenSpec introduce un paso intermedio y revisable: el agente redacta una **propuesta de cambio** (qué, por qué, cómo y lista de tareas) que el equipo revisa y aprueba **antes** de implementar.
+
+## Principios
+
+1. **Las specs son la fuente de verdad.** `openspec/specs/` describe cómo se comporta el sistema hoy, organizado por dominios.
+2. **Los cambios son deltas.** Cada cambio vive en su carpeta dentro de `openspec/changes/` y solo describe lo que añade, modifica o elimina.
+3. **Brownfield primero.** No hay que documentar todo el sistema para empezar: solo se escriben specs de lo que se va a tocar. La documentación crece con el trabajo real.
+4. **Ligero e iterativo.** Sin fases rígidas; los artefactos se pueden editar en cualquier momento.
+5. **Agnóstico de herramienta.** Funciona con Claude Code, GitHub Copilot, Cursor, Codex, Gemini CLI, OpenCode, Windsurf y muchos otros.
+6. **Todo en Git.** Specs y cambios se versionan junto al código y se revisan en las PR.
+
+## Cómo funciona
+
+```text
+openspec/
+├── config.yaml          # contexto y reglas para la IA
+├── specs/<dominio>/     # fuente de verdad: comportamiento actual
+└── changes/<cambio>/    # cambio en curso
+    ├── proposal.md      # por qué y alcance
+    ├── specs/           # delta specs (ADDED / MODIFIED / REMOVED)
+    ├── design.md        # decisiones técnicas
+    └── tasks.md         # checklist de implementación
+```
+
+El ciclo básico se maneja con comandos en el chat del agente:
+
+`/opsx:propose` → *revisión humana* → `/opsx:apply` → `/opsx:archive`
+
+Al archivar, las delta specs se fusionan en `openspec/specs/` y el cambio pasa a `openspec/changes/archive/`. Si hay incertidumbre previa, `/opsx:explore` sirve para investigar sin escribir nada.
+
+<Aside type="caution" title="Novedad respecto a versiones anteriores">
+`/opsx:update` (experimental) revisa los artefactos de planificación de un cambio y los mantiene coherentes entre sí, sin tocar código. Es útil tras recibir feedback en la revisión de la propuesta.
+</Aside>
+
+## Comparativa con alternativas
+
+| Enfoque | Puntos fuertes | Limitaciones |
+|---|---|---|
+| **OpenSpec**: ligero, deltas, brownfield primero | Agnóstico de herramienta y modelo; poca ceremonia; encaja con código existente | Menos guiado que Spec Kit en proyectos desde cero |
+| **GitHub Spec Kit**: fases rígidas | Muy exhaustivo | Pesado; mucha configuración; orientado a greenfield |
+| **Kiro (AWS)**: IDE con specs integradas | Experiencia integrada | Atado a su IDE y a sus modelos |
+| **Sin specs**: prompts directos | Rápido para prototipos | Resultados impredecibles; sin trazabilidad |
+
+## Qué no es OpenSpec
+
+- **No es un generador de código.** El código lo escribe el agente que uses.
+- **No sustituye al backlog.** El backlog guarda el qué de negocio y el estado; OpenSpec guarda el comportamiento del sistema y el detalle técnico del cambio.
+- **No sustituye a los tests.** Los escenarios de las specs deben acabar traducidos en tests automatizados.
+
+## Siguiente paso
+
+[Conceptos: specs, changes y deltas](/empieza/conceptos/)

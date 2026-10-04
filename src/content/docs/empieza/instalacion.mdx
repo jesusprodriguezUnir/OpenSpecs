@@ -1,0 +1,204 @@
+---
+title: "Instalación"
+description: "Instala OpenSpec 1.14.0, inicializa un repositorio con una herramienta de IA, entiende la estructura generada y conoce los comandos de terminal esenciales."
+openspecVersion: "1.14.0"
+lastReviewed: 2026-10-04
+level: inicio
+sidebar:
+  order: 3
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Requisitos
+
+- **Node.js 20.19.0 o superior** (recomendado una LTS reciente).
+- **Git**.
+- Un **asistente de IA compatible** (por ejemplo Claude Code). OpenSpec prepara los comandos para él, pero no lo incluye.
+
+## Instalar la CLI
+
+<Tabs syncKey="shell">
+  <TabItem label="PowerShell">
+```powershell
+npm install -g @fission-ai/openspec@latest
+openspec --version
+```
+  </TabItem>
+  <TabItem label="bash">
+```bash
+npm install -g @fission-ai/openspec@latest
+openspec --version
+```
+  </TabItem>
+</Tabs>
+
+También puedes instalarlo con pnpm, yarn, bun o nix. Esta web está escrita contra la versión **1.14.0**.
+
+La telemetría solo recoge el nombre del comando y la versión. En entornos corporativos conviene desactivarla; en CI ya se desactiva sola.
+
+<Tabs syncKey="shell">
+  <TabItem label="PowerShell">
+```powershell
+openspec config set telemetry.enabled false
+# alternativa por variable de entorno
+$env:OPENSPEC_TELEMETRY = "0"
+```
+  </TabItem>
+  <TabItem label="bash">
+```bash
+openspec config set telemetry.enabled false
+# alternativa por variable de entorno
+export OPENSPEC_TELEMETRY=0
+```
+  </TabItem>
+</Tabs>
+
+## Inicializar un repositorio
+
+Desde la raíz del proyecto, de forma interactiva:
+
+<Tabs syncKey="shell">
+  <TabItem label="PowerShell">
+```powershell
+cd MiProyecto
+openspec init
+```
+  </TabItem>
+  <TabItem label="bash">
+```bash
+cd MiProyecto
+openspec init
+```
+  </TabItem>
+</Tabs>
+
+Para saltarte el selector, indica la herramienta con `--tools`. Es la ruta rápida y la que se usa en el tutorial:
+
+<Tabs syncKey="shell">
+  <TabItem label="PowerShell">
+```powershell
+openspec init --tools claude
+```
+  </TabItem>
+  <TabItem label="bash">
+```bash
+openspec init --tools claude
+```
+  </TabItem>
+</Tabs>
+
+<Aside type="caution" title="Cambios respecto a la 1.13">
+`--tools` admite más de 40 herramientas, además de los valores especiales `all` y `none`, y acepta una lista separada por comas. Ejecuta `openspec init --help` para ver los identificadores válidos de tu versión.
+</Aside>
+
+Opciones útiles de `init`:
+
+| Opción | Efecto |
+|---|---|
+| `--tools <lista>` | Herramientas de IA para las que generar comandos y skills (`all`, `none` o lista) |
+| `--language <idioma>` | Idioma de los artefactos nuevos. No sobrescribe un `config.yaml` existente: si ya existe, indica el idioma en `context` |
+| `--profile <perfil>` | Perfil de workflows: `core` o `custom` |
+| `--force` | Limpia ficheros legacy de versiones anteriores |
+
+## Estructura generada
+
+```text
+MiProyecto/
+├── .claude/                     # skills y comandos de OpenSpec (con --tools claude)
+└── openspec/
+    ├── config.yaml              # contexto y reglas para la IA
+    ├── specs/                   # fuente de verdad, por dominio
+    └── changes/                 # cambios en curso
+        └── archive/             # cambios completados
+```
+
+Con el perfil `core` y Claude Code se generan 6 skills y 6 comandos en `.claude/`. No los edites a mano: `openspec update` los regenera y los sobrescribe.
+
+<Tabs syncKey="shell">
+  <TabItem label="PowerShell">
+```powershell
+openspec update
+```
+  </TabItem>
+  <TabItem label="bash">
+```bash
+openspec update
+```
+  </TabItem>
+</Tabs>
+
+## Comandos de chat
+
+Los comandos `/opsx:*` se escriben en el chat de tu agente, no en la terminal.
+
+| Comando | Qué hace | Perfil |
+|---|---|---|
+| `/opsx:propose <nombre>` | Crea el change con proposal, delta specs, design y tasks | core |
+| `/opsx:explore` | Investiga el problema y el código sin escribir nada | core |
+| `/opsx:apply [<nombre>]` | Implementa las tareas de `tasks.md` y las marca | core |
+| `/opsx:sync` | Sincroniza las delta specs con las specs principales sin archivar | core |
+| `/opsx:archive` | Fusiona los deltas en `specs/` y archiva el change | core |
+| `/opsx:update` | Revisa los artefactos de planificación y los mantiene coherentes | core, experimental |
+| `/opsx:verify`, `/opsx:new`, `/opsx:continue`, `/opsx:ff`, `/opsx:bulk-archive`, `/opsx:onboard` | Control incremental, verificación, archivado masivo y tutorial guiado | Perfil ampliado |
+
+Para activar el perfil ampliado:
+
+<Tabs syncKey="shell">
+  <TabItem label="PowerShell">
+```powershell
+openspec config profile
+```
+  </TabItem>
+  <TabItem label="bash">
+```bash
+openspec config profile
+```
+  </TabItem>
+</Tabs>
+
+<Aside type="caution" title="Nuevo y experimental">
+`/opsx:update` no existía en la 1.13. Solo modifica artefactos de planificación y nunca toca código. Al ser experimental, su comportamiento puede cambiar entre versiones.
+</Aside>
+
+## `config.yaml`
+
+Fija el schema, inyecta contexto en los artefactos y define reglas por artefacto:
+
+```yaml
+schema: spec-driven
+
+context: |
+  Dominio: gestión de reservas (franjas, clientes, cancelaciones).
+  Las APIs públicas deben mantener compatibilidad hacia atrás.
+
+rules:
+  specs:
+    - Escenarios en formato Given/When/Then
+  tasks:
+    - Cada tarea incluye su test asociado
+```
+
+- `context` se aplica a **todos** los artefactos. Incluye solo restricciones que el agente no pueda deducir leyendo el código.
+- `rules.<artefacto>` se aplica solo al artefacto indicado.
+
+<Aside type="caution" title="Bloque nuevo: operations">
+`config.yaml` admite además `operations.apply.guidance` y `operations.archive.guidance`: orientación para la ejecución de `apply` y `archive`, separada de las reglas de los artefactos. No aparecía en la documentación de la 1.13.
+</Aside>
+
+## Comandos de terminal esenciales
+
+| Comando | Uso |
+|---|---|
+| `openspec init [path]` | Inicializa el repositorio |
+| `openspec update [path]` | Regenera skills y comandos tras actualizar la versión (`--force`) |
+| `openspec list` | Lista changes; con `--specs`, `--changes`, `--archived` o `--json` |
+| `openspec show [item]` | Detalle de un change o spec (`--json`, `--type`) |
+| `openspec validate [item]` | Valida estructura y formato (`--all`, `--strict`, `--json`, `--no-interactive`) |
+| `openspec archive [change]` | Archiva un change (`-y`, `--skip-specs`) |
+
+En un repositorio recién inicializado, `openspec validate --all --strict --no-interactive` responde «No items found to validate.» con código de salida 0, así que puedes dejarlo en CI desde el primer día.
+
+## Siguiente paso
+
+[Tu primer cambio en 30 minutos](/empieza/primer-cambio/)
