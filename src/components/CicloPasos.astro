@@ -1,0 +1,96 @@
+---
+// Four-step /opsx cycle as an ordered list. The active-step highlight is CSS only.
+const steps = [
+	{ cmd: 'explore', desc: 'Piensa el cambio antes de escribir nada.' },
+	{ cmd: 'propose', desc: 'Propuesta, specs, diseño y tareas.' },
+	{ cmd: 'apply', desc: 'El agente lo implementa contra la spec.' },
+	{ cmd: 'archive', desc: 'Fusiona las specs y cierra el cambio.' },
+];
+---
+
+<ol class="ciclo-pasos not-content" aria-label="Ciclo de trabajo /opsx">
+	{
+		steps.map((s, i) => (
+			<li class:list={['paso', { last: i === steps.length - 1 }]} style={`--i:${i}`}>
+				<span class="num">{`0${i + 1}`}</span>
+				<span class="cmd">{`/opsx:${s.cmd}`}</span>
+				<span class="desc">{s.desc}</span>
+			</li>
+		))
+	}
+</ol>
+
+<style>
+	.ciclo-pasos {
+		display: grid;
+		grid-template-columns: 1fr;
+		margin: 1.5rem 0;
+		padding: 0;
+		list-style: none;
+		border: 1px solid var(--sl-color-gray-6);
+		border-radius: 0.5rem;
+		overflow: hidden;
+	}
+	.paso {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		padding: 1.25rem 1.5rem;
+		border-bottom: 1px solid var(--sl-color-gray-6);
+	}
+	.paso:last-child {
+		border-bottom: 0;
+	}
+	.num {
+		font-family: var(--sl-font-mono);
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-3);
+	}
+	.cmd {
+		font-family: var(--sl-font-mono);
+		font-size: var(--sl-text-lg);
+		font-weight: 600;
+		color: var(--sl-color-white);
+	}
+	.desc {
+		font-size: var(--sl-text-sm);
+		line-height: 1.45;
+		color: var(--sl-color-gray-2);
+	}
+
+	@media (min-width: 50rem) {
+		.ciclo-pasos {
+			grid-template-columns: repeat(4, 1fr);
+		}
+		.paso {
+			border-bottom: 0;
+			border-inline-end: 1px solid var(--sl-color-gray-6);
+		}
+		.paso:last-child {
+			border-inline-end: 0;
+		}
+	}
+
+	/* One pass, left to right; the last step stays highlighted. */
+	@media (prefers-reduced-motion: no-preference) {
+		.paso {
+			animation: paso-activo 1.2s ease-in-out;
+			animation-delay: calc(var(--i) * 1.2s + 0.5s);
+		}
+		.paso.last {
+			animation-name: paso-final;
+			animation-fill-mode: forwards;
+		}
+	}
+	@keyframes paso-activo {
+		20%,
+		80% {
+			background: var(--sl-color-accent-low);
+		}
+	}
+	@keyframes paso-final {
+		to {
+			background: var(--sl-color-accent-low);
+		}
+	}
+</style>
