@@ -76,6 +76,21 @@ Antes de conectar un agente a tickets, código o repositorios con datos personal
 
 Las plantillas de PR y de ticket están en [Plantillas](/referencia/plantillas/).
 
+## Antes de abrir la PR
+
+Repasa esta lista en cada change, no solo durante el piloto:
+
+- [ ] Cada requisito usa SHALL o MUST y describe comportamiento observable.
+- [ ] Todos los criterios de aceptación de la historia están cubiertos por escenarios, incluidos los errores y los límites.
+- [ ] Los `MODIFIED` reescriben el requisito completo y los `REMOVED` indican motivo y migración.
+- [ ] Las specs no contienen detalles de implementación: esos van en `design.md`.
+- [ ] `openspec validate <change> --strict` pasa sin errores.
+- [ ] La rama y el change se llaman igual.
+- [ ] `tasks.md` refleja la realidad: nada marcado que no esté hecho.
+- [ ] El subagente verificador no deja escenarios sin cubrir.
+- [ ] El change está archivado y `openspec/specs/` se actualiza en esta misma PR.
+- [ ] Las migraciones de datos, si las hay, tienen plan de vuelta atrás.
+
 ## Siguiente paso
 
 [Comandos de chat](/referencia/comandos-chat/)

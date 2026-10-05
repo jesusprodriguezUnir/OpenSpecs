@@ -35,6 +35,12 @@ describe('calidad: workflow de CI', () => {
 		expect(job('build')).toContain('npm run build');
 	});
 
+	test('Scenario: PDF desfasado falla la CI', () => {
+		const build = job('build');
+		expect(build).toContain('npm run manual:check');
+		expect(build.indexOf('npm run build')).toBeLessThan(build.indexOf('npm run manual:check'));
+	});
+
 	test('Scenario: Un test unitario en rojo falla la CI', () => {
 		expect(job('unit')).toContain('npm run test:unit');
 	});

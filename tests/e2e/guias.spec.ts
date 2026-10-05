@@ -73,4 +73,16 @@ test.describe('guias', () => {
 	test('Scenario: Pestañas de shell en configuración', async ({ page }) => {
 		await expectShellTabs(page, '/guias/configuracion/');
 	});
+
+	test('Scenario: Tabla de revisión por punto de control', async ({ page }) => {
+		await page.goto('/guias/flujo-opsx/');
+		const heading = page.locator('main h2', { hasText: 'Qué revisar en cada punto de control' });
+		await expect(heading).toHaveCount(1);
+		const table = page.locator(
+			'xpath=//main//h2[normalize-space()="Qué revisar en cada punto de control"]/following::table[1]',
+		);
+		const headers = (await table.locator('thead th').allTextContents()).map((t) => t.trim());
+		expect(headers).toEqual(['Momento', 'Revisor', 'Foco']);
+		expect(await table.locator('tbody tr').count()).toBeGreaterThan(0);
+	});
 });

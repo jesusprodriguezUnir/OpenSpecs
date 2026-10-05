@@ -62,13 +62,15 @@ El **archive va dentro de la misma PR**, antes del merge. Así `main` nunca tien
 
 Para cambios de alto impacto, abre primero una PR **solo con el change** (proposal, specs, design y tasks). Cuando se aprueba, implementa en la misma rama o en otra. Para cambios pequeños basta con revisar las specs dentro de la PR de código.
 
-## Puntos de control
+## Qué revisar en cada punto de control
 
-| Momento | Quién revisa | Foco |
+El flujo tiene tres momentos de revisión humana. Cada uno mira algo distinto; si se mezclan, la revisión acaba siendo de trámite.
+
+| Momento | Revisor | Foco |
 |---|---|---|
-| Tras `propose` | Responsable técnico o equipo | ¿Resuelve el problema correcto? ¿Escenarios completos? ¿Diseño coherente con la arquitectura? |
-| Tras `verify` | Quien implementa | ¿Cada escenario tiene código y test? ¿`tasks.md` refleja la realidad? |
-| PR | Revisor de código | Código, delta specs y archive; pipeline en verde. |
+| Tras `propose` | Responsable técnico o equipo | ¿Resuelve el problema correcto? ¿Hay escenarios para el caso feliz, los errores y los límites (por ejemplo, `RESERVA_DUPLICADA` o una franja fuera de horario)? ¿El diseño es coherente con la arquitectura? |
+| Tras `verify` | Quien implementa | ¿Cada escenario tiene código y un test cuyo nombre contiene `Scenario: <nombre>`? ¿`tasks.md` refleja la realidad, sin tareas marcadas que no estén hechas? |
+| PR | Revisor de código | Código, delta specs y archive en la misma PR; `openspec validate --all --strict` y los tests en verde en la pipeline. |
 
 ## Siguiente paso
 

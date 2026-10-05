@@ -1,0 +1,630 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { getCollection, render } from 'astro:content';
+import { MANUAL_AUTHOR, MANUAL_READING_ROUTE } from '../config/manual.mjs';
+import { MANUAL_GROUPS, editionDate, manualAnchor, orderManualEntries, referenceVersion } from '../lib/manual-order';
+
+// Printable manual: every sidebar page in sidebar order, laid out as a book (cover, chapter 00,
+// index by part, numbered chapters and annexes). Source of public/manual-openspec.pdf
+// (npm run manual:pdf). Kept out of search engines, the sitemap and Pagefind.
+const entries = await getCollection('docs');
+const sections = await Promise.all(
+	orderManualEntries(entries).map(async ({ group, kind, number, label, entry }) => ({
+		group,
+		kind,
+		number,
+		label,
+		id: manualAnchor(entry.id),
+		slug: entry.id,
+		title: entry.data.title,
+		description: entry.data.description,
+		Content: (await render(entry)).Content,
+	})),
+);
+const bySlug = new Map(sections.map((s) => [s.slug, s]));
+const version = referenceVersion(entries);
+const edition = editionDate(entries);
+const editionLabel = edition ? edition.charAt(0).toUpperCase() + edition.slice(1) : undefined;
+
+const HOWTO_ID = 'como-usar-este-manual';
+const route = MANUAL_READING_ROUTE.map((step) => ({
+	...step,
+	chapters: step.slugs.map((slug) => {
+		const section = bySlug.get(slug);
+		if (!section) throw new Error(`[manual] la ruta de lectura apunta a «${slug}», que no está en el manual`);
+		return section;
+	}),
+}));
+const parts = MANUAL_GROUPS.map((g) => ({
+	label: g.label,
+	items: sections.filter((s) => s.group === g.label),
+})).filter((p) => p.items.length > 0);
+const FLOW = ['explore', 'propose', 'revisión', 'apply', 'verify', 'archive'];
+---
+
+<StarlightPage
+	frontmatter={{
+		title: 'Manual de OpenSpec desde cero',
+		description: 'Todas las guías de OpenSpec desde cero en una sola página imprimible.',
+		template: 'splash',
+		pagefind: false,
+		tableOfContents: false,
+		prev: false,
+		next: false,
+		head: [{ tag: 'meta', attrs: { name: 'robots', content: 'noindex' } }],
+	}}
+>
+	<div class="manual" data-manual>
+		<section class="cover" data-manual-cover aria-labelledby="manual-portada">
+			<div class="cover-art" aria-hidden="true"><span class="disc"></span><span class="ring"></span></div>
+			<div class="cover-body">
+				<p class="kicker">Manual práctico · Spec-driven development</p>
+				<h2 id="manual-portada" class="cover-title">OpenSpec<br />desde cero</h2>
+				<p class="cover-subtitle">
+					Edición imprimible de la web: todo el contenido en un solo documento, en el mismo orden que el
+					menú lateral. La versión en línea siempre es la más reciente.
+				</p>
+				<p class="cover-flow">
+					{
+						FLOW.map((step, i) => (
+							<>
+								{i > 0 && <span class="sep"> › </span>}
+								<span class:list={{ soft: step === 'revisión' }}>{step}</span>
+							</>
+						))
+					}
+				</p>
+			</div>
+			<p class="cover-footer">
+				<span data-manual-author>{MANUAL_AUTHOR}</span>
+				<span data-manual-version>OpenSpec v{version}{editionLabel && ` · ${editionLabel}`}</span>
+			</p>
+		</section>
+
+		<section class="howto" id={HOWTO_ID} data-manual-howto aria-labelledby={`${HOWTO_ID}-titulo`}>
+			<p class="chapter-label">Capítulo 00</p>
+			<h2 class="section-title" id={`${HOWTO_ID}-titulo`}>Cómo usar este manual</h2>
+			<p class="lead">
+				Una ruta práctica para pasar de no haber usado nunca OpenSpec a trabajar con él a diario, con tu
+				asistente de IA y el backlog de tu equipo.
+			</p>
+			<hr class="rule" />
+			<h3>A quién va dirigido</h3>
+			<p>
+				A desarrolladores y responsables técnicos que ya trabajan con asistentes de IA y quieren que el agente
+				implemente a partir de especificaciones revisadas, no de prompts sueltos. No se asume ningún conocimiento
+				previo de OpenSpec.
+			</p>
+			<h3>Ruta recomendada</h3>
+			<p>
+				Léelo de principio a fin la primera vez. Después, los anexos sirven como consulta rápida.
+			</p>
+			<table data-manual-route>
+				<thead>
+					<tr><th scope="col">Momento</th><th scope="col">Qué hacer</th><th scope="col">Capítulos</th></tr>
+				</thead>
+				<tbody>
+					{
+						route.map((step) => (
+							<tr>
+								<td>{step.when}</td>
+								<td>{step.what}</td>
+								<td>
+									{step.chapters.map((c, i) => (
+										<>
+											{i > 0 && ', '}
+											<a href={`#${c.id}`} title={c.title}>{c.number}</a>
+										</>
+									))}
+								</td>
+							</tr>
+						))
+					}
+				</tbody>
+			</table>
+			<aside class="starlight-aside starlight-aside--note" aria-label="Versión de referencia">
+				<p class="starlight-aside__title">Versión de referencia</p>
+				<div class="starlight-aside__content">
+					<p>
+						El manual está escrito sobre OpenSpec v{version}. Las versiones anteriores a la 1.x usaban comandos y
+						ficheros distintos; ante cualquier discrepancia, manda la documentación oficial de la versión que tengas
+						instalada.
+					</p>
+				</div>
+			</aside>
+			<h3>Convenciones del documento</h3>
+			<ul>
+				<li><code>openspec …</code> son comandos de terminal (CLI).</li>
+				<li><code>/opsx:…</code> son comandos de chat dentro de tu asistente de IA.</li>
+				<li>Los comandos aparecen en PowerShell y en bash, uno tras otro.</li>
+				<li>El ejemplo que recorre el manual es un sistema neutro de gestión de reservas, sin datos personales.</li>
+			</ul>
+		</section>
+
+		<nav class="toc" aria-labelledby="manual-indice">
+			<p class="kicker-dark">Contenido</p>
+			<h2 id="manual-indice">Índice</h2>
+			<hr class="rule" />
+			{
+				parts.map((part, i) => (
+					<div class="part" data-manual-part={part.label}>
+						<h3 class="part-title">{part.label}</h3>
+						<ol>
+							{i === 0 && (
+								<li>
+									<span class="num">00</span>
+									<span class="entry">
+										<a href={`#${HOWTO_ID}`}>Cómo usar este manual</a>
+										<span class="desc">Ruta recomendada por días y a quién va dirigido</span>
+									</span>
+								</li>
+							)}
+							{part.items.map((s) => (
+								<li>
+									<span class="num">{s.number}</span>
+									<span class="entry">
+										<a href={`#${s.id}`}>{s.title}</a>
+										{s.description && <span class="desc">{s.description}</span>}
+									</span>
+								</li>
+							))}
+						</ol>
+					</div>
+				))
+			}
+		</nav>
+
+		{
+			sections.map(({ id, title, label, description, Content }) => (
+				<section class="manual-section" id={id} data-manual-section aria-labelledby={`${id}-titulo`}>
+					<p class="chapter-label" data-manual-label>
+						{label}
+					</p>
+					<h2 class="section-title" id={`${id}-titulo`}>
+						{title}
+					</h2>
+					{description && <p class="lead">{description}</p>}
+					<hr class="rule" />
+					<Content />
+				</section>
+			))
+		}
+	</div>
+</StarlightPage>
+
+<style>
+	/* Book look, scoped to /manual/: white paper on screen and on print, whatever the site theme. */
+	.manual {
+		--m-petrol: #0f3a44;
+		--m-teal: #0e5f66;
+		--m-teal-soft: #e6f2f2;
+		--m-orange: #b45309;
+		--m-orange-light: #f0a35e;
+		--m-orange-soft: #fdf1e6;
+		--m-ink: #1f2933;
+		--m-muted: #52606d;
+		--m-line: #d5dbe0;
+		--m-code-bg: #1e2a33;
+		--m-heading: 'IBM Plex Sans', system-ui, sans-serif;
+		/* Light Starlight tokens inside the manual, so rendered MDX reads ink on paper. */
+		--sl-color-white: var(--m-ink);
+		--sl-color-gray-1: #24272f;
+		--sl-color-gray-2: #353841;
+		--sl-color-gray-3: var(--m-muted);
+		--sl-color-gray-5: var(--m-line);
+		--sl-color-gray-6: #eceef2;
+		--sl-color-text: var(--m-ink);
+		--sl-color-text-accent: var(--m-teal);
+		--sl-color-accent: var(--m-teal);
+		--sl-color-accent-high: var(--m-petrol);
+		--sl-color-accent-low: var(--m-teal-soft);
+		--sl-color-hairline: var(--m-line);
+		--sl-color-hairline-light: var(--m-line);
+		--sl-color-bg-inline-code: #eef1f4;
+		background: #fff;
+		color: var(--m-ink);
+		padding: 0 1rem 2rem;
+		border-radius: 0.5rem;
+	}
+	.manual :global(a) {
+		color: var(--m-teal);
+	}
+
+	/* Cover */
+	.cover {
+		position: relative;
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		min-height: 36rem;
+		margin: 0 -1rem;
+		padding: 3rem 2rem 2rem;
+		border-radius: 0.5rem 0.5rem 0 0;
+		background: var(--m-petrol);
+		color: #fff;
+	}
+	.cover-art .disc,
+	.cover-art .ring {
+		position: absolute;
+		border-radius: 50%;
+	}
+	.cover-art .disc {
+		width: 34rem;
+		height: 34rem;
+		top: -14rem;
+		right: -8rem;
+		background: #0f5764;
+	}
+	.cover-art .ring {
+		width: 12rem;
+		height: 12rem;
+		top: 13rem;
+		right: 9rem;
+		border: 2px solid #d9792b;
+	}
+	.cover-body {
+		position: relative;
+		margin-top: 12rem;
+	}
+	.kicker,
+	.kicker-dark,
+	.chapter-label {
+		margin: 0;
+		font-family: var(--m-heading);
+		font-weight: 700;
+		font-size: 0.8rem;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+	}
+	.kicker {
+		color: var(--m-orange-light);
+	}
+	.kicker-dark,
+	.chapter-label {
+		color: var(--m-orange);
+	}
+	.cover-title {
+		margin: 0.75rem 0 1rem;
+		font-family: var(--m-heading);
+		font-weight: 700;
+		font-size: clamp(2.6rem, 9vw, 4.2rem);
+		line-height: 1;
+		letter-spacing: -0.02em;
+		color: #fff;
+	}
+	.cover-subtitle {
+		max-width: 34rem;
+		color: #d7e6e8;
+		font-size: 1.05rem;
+	}
+	.cover-flow {
+		margin-top: 2rem;
+		font-family: var(--sl-font-mono);
+		font-size: 0.85rem;
+		font-weight: 600;
+		color: #fff;
+	}
+	.cover-flow .sep,
+	.cover-flow .soft {
+		color: #9cc3c7;
+		font-weight: 400;
+	}
+	.cover-footer {
+		position: relative;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		gap: 0.5rem;
+		margin-top: 3rem;
+		padding-top: 0.75rem;
+		border-top: 1px solid #2c5560;
+		font-size: 0.8rem;
+		color: #c3d5d8;
+	}
+
+	/* Chapter openers */
+	.section-title,
+	.toc h2 {
+		margin-top: 0.4rem;
+		font-family: var(--m-heading);
+		font-weight: 700;
+		font-size: clamp(1.8rem, 5vw, 2.4rem);
+		line-height: 1.15;
+		color: var(--m-ink);
+	}
+	.lead {
+		color: var(--m-muted);
+		font-size: 1.1rem;
+	}
+	.rule {
+		border: 0;
+		border-top: 2px solid var(--m-teal);
+		margin: 1.25rem 0 1.5rem;
+	}
+	.manual-section,
+	.howto,
+	.toc {
+		margin-top: 3rem;
+		padding-top: 2rem;
+	}
+	.manual :global(h2:not(.section-title):not(.cover-title):not(#manual-indice)),
+	.manual :global(.sl-heading-wrapper.level-h2 h2) {
+		font-family: var(--m-heading);
+		font-weight: 700;
+		color: var(--m-teal);
+	}
+	.manual :global(h3) {
+		font-family: var(--m-heading);
+		color: var(--m-ink);
+	}
+
+	/* Index */
+	.part-title {
+		margin: 1.5rem 0 0.25rem;
+		font-size: 0.8rem !important;
+		font-weight: 500;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--m-muted) !important;
+	}
+	.toc ol {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+	.toc li {
+		display: flex;
+		gap: 1rem;
+		margin: 0;
+		padding: 0.5rem 0;
+		border-bottom: 1px dotted var(--m-line);
+	}
+	.toc .num {
+		flex: 0 0 2rem;
+		font-family: var(--m-heading);
+		font-weight: 700;
+		color: var(--m-orange);
+	}
+	.toc .entry {
+		display: flex;
+		flex-direction: column;
+	}
+	.toc .entry a {
+		color: var(--m-ink);
+		text-decoration: none;
+	}
+	.toc .desc {
+		font-size: 0.82rem;
+		color: var(--m-muted);
+	}
+
+	/* Tables: teal header row */
+	.manual :global(table) {
+		border-collapse: collapse;
+		width: 100%;
+	}
+	.manual :global(table th) {
+		background: var(--m-teal);
+		color: #fff;
+		border-color: var(--m-teal);
+		text-align: left;
+	}
+	.manual :global(table td) {
+		border-color: var(--m-line);
+	}
+	.manual :global(table th),
+	.manual :global(table td) {
+		padding: 0.45rem 0.7rem;
+	}
+	.manual :global(table tbody tr:nth-child(odd) td) {
+		background: #f6f8f9;
+	}
+
+	/* Asides: left-bordered boxes with a small-caps label */
+	.manual :global(.starlight-aside) {
+		border: 0;
+		border-inline-start: 4px solid var(--m-teal);
+		border-radius: 0 0.4rem 0.4rem 0;
+		background: var(--m-teal-soft);
+		color: var(--m-ink);
+		padding: 0.9rem 1.1rem;
+	}
+	.manual :global(.starlight-aside--caution),
+	.manual :global(.starlight-aside--danger) {
+		border-inline-start-color: #d9792b;
+		background: var(--m-orange-soft);
+	}
+	.manual :global(.starlight-aside__title) {
+		font-family: var(--m-heading);
+		font-size: 0.78rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--m-teal);
+	}
+	.manual :global(.starlight-aside--caution .starlight-aside__title),
+	.manual :global(.starlight-aside--danger .starlight-aside__title) {
+		color: var(--m-orange);
+	}
+	.manual :global(.starlight-aside__icon) {
+		display: none;
+	}
+
+	/* Code: dark rounded blocks; tokens use the dark theme colours (first Expressive Code theme). */
+	.manual :global(.expressive-code .frame) {
+		--code-background: var(--m-code-bg);
+		border-radius: 0.5rem;
+		overflow: hidden;
+		box-shadow: none;
+	}
+	.manual :global(.expressive-code pre) {
+		background: var(--m-code-bg) !important;
+		border: 0 !important;
+		border-radius: 0.5rem;
+		color: #e6edf3;
+	}
+	.manual :global(.expressive-code .frame.has-title pre),
+	.manual :global(.expressive-code .frame.is-terminal pre) {
+		border-radius: 0 0 0.5rem 0.5rem;
+	}
+	.manual :global(.expressive-code span[style^='--']:not([class])) {
+		color: var(--0, inherit) !important;
+	}
+	.manual :global(.expressive-code .header) {
+		background: #142029 !important;
+		color: #c3d5d8;
+		border: 0 !important;
+	}
+	.manual :global(.expressive-code .header .title) {
+		color: #c3d5d8 !important;
+		background: transparent !important;
+		border: 0 !important;
+	}
+	/* Inserted/deleted line markers on the dark background. */
+	.manual :global(.expressive-code .ec-line.ins) {
+		background: #1d3b2a !important;
+	}
+	.manual :global(.expressive-code .ec-line.del) {
+		background: #3d2226 !important;
+	}
+	.manual :global(.expressive-code .ec-line.ins::before),
+	.manual :global(.expressive-code .ec-line.del::before) {
+		color: #e6edf3 !important;
+	}
+	.manual :global(table th code) {
+		background: rgba(255, 255, 255, 0.15);
+		color: #fff;
+	}
+	.manual :global(.expressive-code .copy) {
+		display: none;
+	}
+	/* Long code lines wrap instead of scrolling: nothing is cut off on paper. */
+	.manual :global(.expressive-code pre),
+	.manual :global(.expressive-code pre code) {
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
+	}
+	.manual :global(.expressive-code pre) {
+		overflow: visible;
+	}
+	/* GFM task lists: a printed checklist needs no unlabeled form controls. */
+	.manual :global(.task-list-item input[type='checkbox']) {
+		display: none;
+	}
+	.manual :global(.task-list-item)::before {
+		content: '☐ ';
+	}
+
+	/* Same (zero) side margins on every page: Chromium lays out all pages with one width, so the
+	   cover bleeds through top/bottom only and interior pages get their side margin as padding. */
+	@page {
+		size: A4;
+		margin: 16mm 0 18mm;
+	}
+	@page :first {
+		margin: 0;
+	}
+
+	@media print {
+		:global(header.header),
+		:global(#starlight__sidebar),
+		:global(.sidebar-pane),
+		:global(site-search),
+		:global(.mobile-preferences),
+		:global(.right-sidebar-container),
+		:global(.skip-link),
+		:global(footer),
+		:global(.site-footer),
+		:global(.content-panel:has(+ .content-panel .manual) h1),
+		:global(.content-panel:has(+ .content-panel .manual)) {
+			display: none !important;
+		}
+		:global(html),
+		:global(body),
+		:global(.main-frame),
+		:global(.main-pane),
+		:global(.content-panel),
+		:global(.sl-container) {
+			background: #fff !important;
+			padding: 0 !important;
+			margin: 0 !important;
+			max-width: none !important;
+			border: 0 !important;
+		}
+		.manual {
+			padding: 0;
+			border-radius: 0;
+		}
+		.howto,
+		.toc,
+		.manual-section {
+			padding-inline: 16mm !important;
+		}
+		.cover {
+			box-sizing: border-box;
+			width: 210mm;
+			height: 297mm;
+			min-height: 0;
+			margin: 0;
+			padding: 0 20mm 22mm;
+			border-radius: 0;
+			-webkit-print-color-adjust: exact;
+			print-color-adjust: exact;
+		}
+		.cover-body {
+			margin-top: 110mm;
+		}
+		.cover-art .disc {
+			width: 150mm;
+			height: 150mm;
+			top: -55mm;
+			right: -28mm;
+		}
+		.cover-art .ring {
+			width: 55mm;
+			height: 55mm;
+			top: 82mm;
+			right: 62mm;
+		}
+		.cover-footer {
+			margin-top: auto;
+		}
+		.howto,
+		.toc,
+		.manual-section {
+			break-before: page;
+			margin-top: 0;
+			padding-top: 0;
+		}
+		.toc li,
+		.manual :global(tr),
+		.manual :global(.starlight-aside) {
+			break-inside: avoid;
+		}
+		.manual :global(h2),
+		.manual :global(h3),
+		.manual :global(.sl-heading-wrapper) {
+			break-after: avoid;
+		}
+		/* Tabs (PowerShell / bash): print every panel, labelled by its tab. */
+		.manual :global(starlight-tabs [role='tablist']) {
+			display: none;
+		}
+		.manual :global(starlight-tabs [role='tabpanel']),
+		.manual :global(starlight-tabs [role='tabpanel'][hidden]) {
+			display: block !important;
+		}
+		.manual :global(starlight-tabs [role='tabpanel']::before) {
+			content: attr(data-manual-tab);
+			display: block;
+			font-family: var(--sl-font-mono);
+			font-size: var(--sl-text-sm);
+			font-weight: 600;
+		}
+		.manual :global(pre),
+		.manual :global(figure) {
+			break-inside: avoid;
+		}
+	}
+</style>
