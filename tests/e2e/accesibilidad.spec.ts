@@ -12,6 +12,12 @@ test.describe('accesibilidad', () => {
 		await expectNoSevereViolations(page);
 	});
 
+	test('Scenario: La landing en tema claro sin violaciones graves', async ({ page }) => {
+		await page.goto('/');
+		await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'light'));
+		await expectNoSevereViolations(page);
+	});
+
 	test('Scenario: La 404 sin violaciones graves de accesibilidad', async ({ page }) => {
 		await page.goto('/ruta-inexistente/');
 		await expectNoSevereViolations(page);

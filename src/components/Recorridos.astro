@@ -1,0 +1,92 @@
+---
+// Three landing journeys. Order is intentional: Equipo (recommended), Inicio, Consulta.
+const recorridos = [
+	{
+		name: 'Equipo',
+		href: '/equipo/adopcion/',
+		desc: 'Vas a adoptarlo en un equipo: plan de adopción, Jira o Azure DevOps y CI.',
+		recommended: true,
+	},
+	{
+		name: 'Inicio',
+		href: '/empieza/que-es/',
+		desc: 'Nunca has usado OpenSpec: qué es, conceptos, instalación y tu primer cambio.',
+		recommended: false,
+	},
+	{
+		name: 'Consulta',
+		href: '/referencia/cli/',
+		desc: 'Buscas un comando o una plantilla concreta: usa el buscador o la referencia.',
+		recommended: false,
+	},
+];
+---
+
+<div class="recorridos not-content">
+	{
+		recorridos.map((r) => (
+			<a href={r.href} class:list={['recorrido', { recommended: r.recommended }]}>
+				<span class="meta">
+					<span class="path">{r.href}</span>
+					{r.recommended && <span class="badge">Recomendado</span>}
+				</span>
+				<span class="name">{r.name} →</span>
+				<span class="desc">{r.desc}</span>
+			</a>
+		))
+	}
+</div>
+
+<style>
+	.recorridos {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 1rem;
+		margin: 1.5rem 0;
+	}
+	.recorrido {
+		display: flex;
+		flex-direction: column;
+		gap: 0.9rem;
+		padding: 1.5rem;
+		border: 1px solid var(--sl-color-gray-6);
+		border-radius: 0.625rem;
+		background: var(--landing-surface);
+		text-decoration: none;
+		color: var(--sl-color-white);
+	}
+	.recorrido:hover {
+		border-color: var(--sl-color-accent);
+	}
+	.recorrido.recommended {
+		border-color: var(--sl-color-accent);
+		background: var(--sl-color-accent-low);
+	}
+	.meta {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		font-family: var(--sl-font-mono);
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-3);
+	}
+	.badge {
+		font-weight: 600;
+		text-transform: uppercase;
+		color: var(--sl-color-accent-high);
+	}
+	.name {
+		font-size: var(--sl-text-2xl);
+		font-weight: 600;
+	}
+	.desc {
+		font-size: var(--sl-text-base);
+		line-height: 1.5;
+		color: var(--sl-color-gray-2);
+	}
+	@media (min-width: 50rem) {
+		.recorridos {
+			grid-template-columns: 1.4fr 1fr 1fr;
+		}
+	}
+</style>

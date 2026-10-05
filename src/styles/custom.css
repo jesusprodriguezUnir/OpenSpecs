@@ -1,3 +1,12 @@
+/* Self-hosted IBM Plex (latin subset only), weights used by the design. */
+@import '@fontsource/ibm-plex-sans/latin-400.css';
+@import '@fontsource/ibm-plex-sans/latin-500.css';
+@import '@fontsource/ibm-plex-sans/latin-600.css';
+@import '@fontsource/ibm-plex-sans/latin-700.css';
+@import '@fontsource/ibm-plex-mono/latin-400.css';
+@import '@fontsource/ibm-plex-mono/latin-500.css';
+@import '@fontsource/ibm-plex-mono/latin-600.css';
+
 /* Site color tokens: Starlight custom properties (dark theme is the default). */
 :root {
 	--sl-color-accent-low: #102a2b;
@@ -11,6 +20,10 @@
 	--sl-color-gray-5: #353841;
 	--sl-color-gray-6: #24272f;
 	--sl-color-black: #17181c;
+	--sl-font: 'IBM Plex Sans', system-ui, sans-serif;
+	--sl-font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+	--landing-bg: #111215;
+	--landing-surface: #17181c;
 }
 
 :root[data-theme='light'] {
@@ -26,4 +39,20 @@
 	--sl-color-gray-6: #eceef2;
 	--sl-color-gray-7: #f5f6f8;
 	--sl-color-black: #ffffff;
+	--landing-bg: #ffffff;
+	--landing-surface: #f5f6f8;
+}
+
+/* Landing background (pages with a hero only). */
+:root[data-has-hero] {
+	--sl-color-bg: var(--landing-bg);
+}
+
+/* Native header, CSS only (no Header override). */
+header.header {
+	border-bottom: 1px solid var(--sl-color-gray-6);
+}
+header.header site-search button {
+	font-family: var(--sl-font-mono);
+	font-size: var(--sl-text-xs);
 }

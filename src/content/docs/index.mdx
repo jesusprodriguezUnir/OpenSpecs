@@ -14,33 +14,19 @@ hero:
       variant: minimal
 ---
 
-import { CardGrid, LinkCard } from '@astrojs/starlight/components';
-import CicloOpsx from '../../components/CicloOpsx.astro';
+import CicloPasos from '../../components/CicloPasos.astro';
+import Recorridos from '../../components/Recorridos.astro';
 
 ## Qué es OpenSpec en 3 frases
 
-OpenSpec es una herramienta de línea de comandos para escribir especificaciones ligeras antes de programar con un agente de IA. Cada cambio empieza como una propuesta con requisitos y escenarios que tú y el agente revisáis juntos. Al terminar, esas especificaciones se fusionan con las del proyecto y quedan como documentación viva.
+1. OpenSpec es una herramienta de línea de comandos para escribir especificaciones ligeras antes de programar con un agente de IA.
+2. Cada cambio empieza como una propuesta con requisitos y escenarios que tú y el agente revisáis juntos.
+3. Al terminar, esas especificaciones se fusionan con las del proyecto y quedan como documentación viva.
 
 ## El ciclo de trabajo
 
-<CicloOpsx />
+<CicloPasos />
 
 ## Elige tu recorrido
 
-<CardGrid>
-	<LinkCard
-		title="Inicio"
-		description="Nunca has usado OpenSpec: qué es, conceptos, instalación y tu primer cambio."
-		href="/empieza/que-es/"
-	/>
-	<LinkCard
-		title="Equipo"
-		description="Vas a adoptarlo en un equipo: plan de adopción, Jira o Azure DevOps y CI."
-		href="/equipo/adopcion/"
-	/>
-	<LinkCard
-		title="Consulta"
-		description="Buscas un comando o una plantilla concreta: usa el buscador o la referencia."
-		href="/referencia/cli/"
-	/>
-</CardGrid>
+<Recorridos />

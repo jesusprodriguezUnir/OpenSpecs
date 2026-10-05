@@ -15,7 +15,8 @@ export default defineConfig({
 				root: { label: 'Español', lang: 'es-ES' },
 			},
 			components: {
-				PageTitle: "./src/components/overrides/PageTitle.astro",
+				Hero: "./src/components/overrides/Hero.astro",
+					PageTitle: "./src/components/overrides/PageTitle.astro",
 				Footer: "./src/components/overrides/Footer.astro",
 			},
 			// Vercel Web Analytics, same origin and cookieless (w11).
