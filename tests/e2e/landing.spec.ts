@@ -128,6 +128,33 @@ test.describe('landing', () => {
 		}
 	});
 
+	test('Scenario: Ninguna animación infinita en la landing', async ({ page }) => {
+		await page.emulateMedia({ reducedMotion: 'no-preference' });
+		await page.goto('/');
+		const iterations = await page.evaluate(() =>
+			document
+				.getAnimations()
+				.filter((a) => (a.effect as KeyframeEffect).target?.closest('.terminal, .ciclo-pasos'))
+				.map((a) => a.effect!.getComputedTiming().iterations),
+		);
+		expect(iterations.length).toBeGreaterThan(0);
+		expect(iterations).not.toContain(Infinity);
+	});
+
+	test('Scenario: Cursor visible al terminar', async ({ page }) => {
+		await page.emulateMedia({ reducedMotion: 'no-preference' });
+		await page.goto('/');
+		await page.evaluate(() =>
+			Promise.all(
+				document
+					.getAnimations()
+					.filter((a) => (a.effect as KeyframeEffect).target?.closest('.terminal'))
+					.map((a) => a.finished),
+			),
+		);
+		await expect(page.locator(`${HERO} .terminal .cursor`)).toHaveCSS('opacity', '1');
+	});
+
 	test('Scenario: Fuentes servidas desde el propio sitio', async ({ page, baseURL }) => {
 		const fonts: string[] = [];
 		page.on('request', (r) => {
