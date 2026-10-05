@@ -25,7 +25,7 @@
 - [x] 4.1 Test E2E "Scenario: Sin animaciones con prefers-reduced-motion" (emulando `reducedMotion: 'reduce'` y comprobando `getAnimations()` vacío y líneas visibles)
 - [x] 4.2 Comprobar que siguen en verde "Scenario: Mismos scripts que una guía" y "Scenario: Script extra detectado"
 - [x] 4.3 Test "Scenario: La landing en tema claro sin violaciones graves" en `tests/e2e/accesibilidad.spec.ts` y verde en "Scenario: La landing sin violaciones graves de accesibilidad"
-- [ ] 4.4 Revisión visual en el preview de Vercel frente a la opción 1a (escritorio y 375 px, ambos temas) y comprobación de LCP < 2,0 s y CLS < 0,05 con Lighthouse
+- [x] 4.4 Revisión visual en el preview de Vercel frente a la opción 1a (escritorio y 375 px, ambos temas) y comprobación de LCP < 2,0 s y CLS < 0,05 con Lighthouse
 
 ## 5. Cierre
 
