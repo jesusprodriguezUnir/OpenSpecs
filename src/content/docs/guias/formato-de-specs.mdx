@@ -99,9 +99,10 @@ En el fichero real no dejas la línea antigua: los marcadores solo muestran qué
 
 - Escribe comportamiento observable, no detalles de implementación (nada de tablas, clases o endpoints concretos salvo que sean el contrato).
 - Un requisito, una regla. Si un requisito necesita «y además», probablemente son dos.
-- Cubre el caso feliz y al menos un caso de error con su código (`RESERVA_DUPLICADA`).
+- Cubre el caso feliz y al menos un caso de error con su código (`RESERVA_DUPLICADA`). Usa códigos de error estables, no mensajes literales: el frontend y los tests dependen de ellos.
 - Usa datos de ejemplo concretos y neutros: salas, franjas, estados. Nunca datos personales.
 - Cada escenario debe poder convertirse en un test cuyo nombre contenga `Scenario: <nombre>`.
+- No rellenes specs de todo el sistema de golpe (*backfilling*): las specs crecen change a change, solo sobre lo que tocas.
 
 ## Checklist de revisión
 

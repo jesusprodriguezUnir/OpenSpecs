@@ -80,4 +80,13 @@ test.describe('agentes y equipo', () => {
 		expect(code).toMatch(/@fission-ai\/openspec@\d+\.\d+\.\d+/);
 		expect(code).not.toContain('@latest');
 	});
+
+	test('Scenario: Checklist antes de abrir la PR', async ({ page }) => {
+		await page.goto('/equipo/adopcion/');
+		await expect(page.locator('main h2', { hasText: 'Antes de abrir la PR' })).toHaveCount(1);
+		const list = page.locator(
+			'xpath=//main//h2[normalize-space()="Antes de abrir la PR"]/following::ul[1]',
+		);
+		expect(await list.locator('li input[type="checkbox"]').count()).toBeGreaterThan(3);
+	});
 });

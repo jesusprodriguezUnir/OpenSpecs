@@ -13,9 +13,12 @@
     "test:e2e": "playwright test",
     "test": "npm run test:unit && npm run test:e2e",
     "links": "node scripts/links.mjs",
-    "snapshot:openspec": "node scripts/openspec-help-snapshot.mjs"
+    "snapshot:openspec": "node scripts/openspec-help-snapshot.mjs",
+    "manual:pdf": "node scripts/manual-pdf.mjs",
+    "manual:check": "node scripts/manual-check.mjs"
   },
   "dependencies": {
+    "@astrojs/sitemap": "3.7.4",
     "@astrojs/starlight": "0.42.5",
     "@fontsource/ibm-plex-mono": "5.3.0",
     "@fontsource/ibm-plex-sans": "5.3.0",

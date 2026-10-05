@@ -1,5 +1,6 @@
 ---
 import Default from '@astrojs/starlight/components/Hero.astro';
+import { MANUAL_PDF_PATH, MANUAL_PDF_SIZE } from '../../config/manual.mjs';
 import plexSans700 from '@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-700-normal.woff2?url';
 
 const { entry } = Astro.locals.starlightRoute;
@@ -49,6 +50,9 @@ const lines = [
 							</a>
 						))}
 					</div>
+					<a href={MANUAL_PDF_PATH} class="manual-link" download>
+						Manual en PDF <span class="size">{MANUAL_PDF_SIZE}</span>
+					</a>
 				</div>
 				<div class="terminal" aria-hidden="true">
 					<div class="bar">
@@ -134,6 +138,14 @@ const lines = [
 	.cta.primary:hover {
 		color: var(--sl-color-black);
 		filter: brightness(1.08);
+	}
+	.manual-link {
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+	}
+	.manual-link .size {
+		font-family: var(--sl-font-mono);
+		color: var(--sl-color-gray-3);
 	}
 	.cta.secondary:hover {
 		border-color: var(--sl-color-gray-3);
