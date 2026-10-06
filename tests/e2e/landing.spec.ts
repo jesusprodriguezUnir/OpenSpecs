@@ -186,3 +186,122 @@ test.describe('landing', () => {
 		expect(scriptExtras(landing, guide)).toEqual([]);
 	});
 });
+
+const INFOGRAPHIC = 'OpenSpec: desarrollo guiado por especificaciones con IA';
+const BLOCKS = ['Fundamentos', 'Los cuatro artefactos de un change', 'El ciclo diario con /opsx', 'En equipo'];
+const CHAT_REFERENCE = '/referencia/comandos-chat/';
+
+const infographic = (page: Page) => page.getByRole('figure', { name: INFOGRAPHIC });
+
+type ChatReference = { commands: string[]; workflows: string[] };
+
+/** Names of the `/opsx:<name>` commands in `text` that the chat reference documents neither as a command nor as a workflow. */
+function undocumentedCommands(text: string, reference: ChatReference): string[] {
+	const names = [...text.matchAll(/\/opsx:([a-z][a-z-]*)/g)].map((m) => m[1]);
+	const known = new Set([...reference.commands, ...reference.workflows]);
+	return [...new Set(names)].filter((n) => !known.has(n));
+}
+
+async function chatReference(page: Page): Promise<ChatReference> {
+	await page.goto(CHAT_REFERENCE);
+	return page.locator('main').evaluate((main) => {
+		const commands = [...(main.textContent ?? '').matchAll(/\/opsx:([a-z][a-z-]*)/g)].map((m) => m[1]);
+		const table = [...main.querySelectorAll('table')].find((t) => t.querySelector('th')?.textContent?.trim() === 'Workflow');
+		const workflows = [...(table?.querySelectorAll('tbody td:first-child code') ?? [])].map((c) => c.textContent?.trim() ?? '');
+		return { commands, workflows };
+	});
+}
+
+test.describe('landing: infografía', () => {
+	test.beforeEach(async ({ page }) => {
+		await page.goto('/');
+	});
+
+	test('Scenario: Infografía tras el bloque de tres frases', async ({ page }) => {
+		const figure = infographic(page);
+		await expect(figure).toHaveCount(1);
+		const before = page.locator('main h2', { hasText: 'Qué es OpenSpec en 3 frases' });
+		const after = page.locator('main h2', { hasText: 'El ciclo de trabajo' });
+		const follows = (a: Element, b: Element) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+		const figureHandle = await figure.elementHandle();
+		expect(await before.evaluate(follows, figureHandle)).toBe(true);
+		expect(await figure.evaluate(follows, await after.elementHandle())).toBe(true);
+	});
+
+	test('Scenario: Contenido como texto y no como imagen', async ({ page }) => {
+		const figure = infographic(page);
+		await expect(figure.locator('img, picture, canvas, image')).toHaveCount(0);
+		for (const title of BLOCKS) {
+			await expect(figure.locator('h3', { hasText: title })).toBeVisible();
+		}
+	});
+
+	test('Scenario: Cuatro bloques en orden', async ({ page }) => {
+		const headings = await infographic(page).locator('h3').allTextContents();
+		expect(headings.map((h) => h.replace(/\s+/g, ' ').trim())).toEqual(BLOCKS.map((t, i) => `${i + 1} ${t}`));
+	});
+
+	test('Scenario: Cada bloque enlaza a una guía existente', async ({ page, request }) => {
+		const blocks = infographic(page).locator('[data-ig-block]');
+		await expect(blocks).toHaveCount(BLOCKS.length);
+		for (const block of await blocks.all()) {
+			const hrefs = await block.locator('a').evaluateAll((as) => as.map((a) => a.getAttribute('href') ?? ''));
+			expect(hrefs.length).toBeGreaterThan(0);
+			for (const href of hrefs) {
+				expect((await request.get(href)).status(), href).toBe(200);
+			}
+		}
+	});
+
+	test('Scenario: Comandos /opsx documentados', async ({ page }) => {
+		const text = (await infographic(page).textContent()) ?? '';
+		expect(text).toMatch(/\/opsx:/);
+		expect(undocumentedCommands(text, await chatReference(page))).toEqual([]);
+	});
+
+	test('Scenario: Comando inexistente detectado', async ({ page }) => {
+		const reference = await chatReference(page);
+		expect(reference.workflows).toContain('verify');
+		expect(undocumentedCommands('/opsx:apply y después /opsx:deploy', reference)).toEqual(['deploy']);
+	});
+
+	test('Scenario: Comando del perfil ampliado marcado', async ({ page }) => {
+		const step = infographic(page).locator('li', { has: page.locator('code', { hasText: '/opsx:verify' }) });
+		await expect(step).toHaveCount(1);
+		await expect(step).toContainText('perfil ampliado');
+	});
+
+	test('Scenario: Rutas y artefactos correctos', async ({ page }) => {
+		const text = (await infographic(page).textContent()) ?? '';
+		for (const expected of ['openspec/specs/', 'openspec/changes/', 'proposal.md', 'specs/', 'design.md', 'tasks.md']) {
+			expect(text).toContain(expected);
+		}
+	});
+
+	test('Scenario: Sin referencias a un stack concreto', async ({ page }) => {
+		const text = (await infographic(page).textContent()) ?? '';
+		expect(text).not.toContain('.NET');
+		expect(text).not.toContain('Angular');
+	});
+
+	test('Scenario: Sin desbordamiento horizontal a 360 px', async ({ page }) => {
+		await page.setViewportSize({ width: 360, height: 800 });
+		await page.goto('/');
+		await expect(infographic(page)).toBeVisible();
+		const { scroll, viewport } = await page.evaluate(() => ({
+			scroll: document.documentElement.scrollWidth,
+			viewport: document.documentElement.clientWidth,
+		}));
+		expect(scroll).toBeLessThanOrEqual(viewport);
+	});
+
+	test('Scenario: Iconos decorativos ocultos a tecnologías de apoyo', async ({ page }) => {
+		const icons = infographic(page).locator('svg');
+		expect(await icons.count()).toBeGreaterThan(0);
+		for (const icon of await icons.all()) {
+			await expect(icon).toHaveAttribute('aria-hidden', 'true');
+			await expect(icon).not.toHaveAttribute('aria-label');
+		}
+		await expect(infographic(page).locator('svg title')).toHaveCount(0);
+	});
+});

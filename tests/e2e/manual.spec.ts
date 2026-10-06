@@ -47,6 +47,38 @@ test.describe('contenido: manual', () => {
 		await expect(first.locator('[data-manual-version]')).toContainText(/OpenSpec v\d+\.\d+\.\d+/);
 	});
 
+	test('Scenario: Infografía tras la portada', async ({ page }) => {
+		await page.goto('/manual/');
+		const order = await page
+			.locator('[data-manual] > section')
+			.evaluateAll((s) =>
+				s.map((e) =>
+					e.hasAttribute('data-manual-cover') ? 'cover' : e.hasAttribute('data-manual-infografia') ? 'infografia' : e.hasAttribute('data-manual-howto') ? 'howto' : e.id,
+				),
+			);
+		expect(order.slice(0, 3)).toEqual(['cover', 'infografia', 'howto']);
+		await expect(
+			page.locator('[data-manual-infografia]').getByRole('figure', { name: 'OpenSpec: desarrollo guiado por especificaciones con IA' }),
+		).toHaveCount(1);
+	});
+
+	test('Scenario: Infografía en una página propia al imprimir', async ({ page }) => {
+		// A4 portrait at 96 dpi; the printable height is 297 mm minus the 16 + 18 mm page margins.
+		const mm = 96 / 25.4;
+		await page.setViewportSize({ width: Math.round(210 * mm), height: Math.round(297 * mm) });
+		await page.emulateMedia({ media: 'print' });
+		await page.goto('/manual/');
+		const breaks = await page.locator('[data-manual-infografia]').evaluate((el) => {
+			const own = getComputedStyle(el);
+			const next = el.nextElementSibling ? getComputedStyle(el.nextElementSibling) : null;
+			return { before: own.breakBefore, after: own.breakAfter, nextBefore: next?.breakBefore, height: el.getBoundingClientRect().height };
+		});
+		expect(breaks.before).toBe('page');
+		expect(breaks.after).toBe('page');
+		expect(breaks.nextBefore).toBe('page');
+		expect(breaks.height).toBeLessThanOrEqual((297 - 16 - 18) * mm);
+	});
+
 	test('Scenario: Capítulo de cómo usar el manual', async ({ page }) => {
 		await page.goto('/manual/');
 		const order = await page

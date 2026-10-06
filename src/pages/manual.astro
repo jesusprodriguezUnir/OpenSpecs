@@ -3,6 +3,7 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import { getCollection, render } from 'astro:content';
 import { MANUAL_AUTHOR, MANUAL_READING_ROUTE } from '../config/manual.mjs';
 import { MANUAL_GROUPS, editionDate, manualAnchor, orderManualEntries, referenceVersion } from '../lib/manual-order';
+import InfografiaSdd from '../components/InfografiaSdd.astro';
 
 // Printable manual: every sidebar page in sidebar order, laid out as a book (cover, chapter 00,
 // index by part, numbered chapters and annexes). Source of public/manual-openspec.pdf
@@ -79,6 +80,10 @@ const FLOW = ['explore', 'propose', 'revisión', 'apply', 'verify', 'archive'];
 				<span data-manual-author>{MANUAL_AUTHOR}</span>
 				<span data-manual-version>OpenSpec v{version}{editionLabel && ` · ${editionLabel}`}</span>
 			</p>
+		</section>
+
+		<section class="infografia-page" id="mapa-openspec" data-manual-infografia aria-label="Infografía de OpenSpec">
+			<InfografiaSdd class="infografia-manual" />
 		</section>
 
 		<section class="howto" id={HOWTO_ID} data-manual-howto aria-labelledby={`${HOWTO_ID}-titulo`}>
@@ -342,6 +347,7 @@ const FLOW = ['explore', 'propose', 'revisión', 'apply', 'verify', 'archive'];
 		border-top: 2px solid var(--m-teal);
 		margin: 1.25rem 0 1.5rem;
 	}
+	.infografia-page,
 	.manual-section,
 	.howto,
 	.toc {
@@ -353,6 +359,11 @@ const FLOW = ['explore', 'propose', 'revisión', 'apply', 'verify', 'archive'];
 		font-family: var(--m-heading);
 		font-weight: 700;
 		color: var(--m-teal);
+	}
+	/* The manual h3 rule must not repaint the infographic block headings. */
+	.infografia-page :global(.ig-heading) {
+		font-family: inherit;
+		color: var(--ig-c);
 	}
 	.manual :global(h3) {
 		font-family: var(--m-heading);
@@ -596,6 +607,18 @@ const FLOW = ['explore', 'propose', 'revisión', 'apply', 'verify', 'archive'];
 			break-before: page;
 			margin-top: 0;
 			padding-top: 0;
+		}
+		/* Infographic on its own A4 page between the cover and chapter 00 (design D6). */
+		.infografia-page {
+			break-before: page;
+			break-after: page;
+			break-inside: avoid;
+			margin-top: 0;
+			padding: 0 16mm;
+		}
+		.infografia-page :global(.infografia-sdd) {
+			--ig-scale: 0.82;
+			margin: 0;
 		}
 		.toc li,
 		.manual :global(tr),
