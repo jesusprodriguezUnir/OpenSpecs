@@ -26,4 +26,4 @@
 ## 5. Cierre
 
 - [x] 5.1 Lighthouse local sobre `/` (rendimiento y accesibilidad ≥ 95, CLS < 0,05). Verificación: anotar las cifras en la PR
-- [ ] 5.2 `npm run build`, `npx astro check`, `npm run test`, `npm run test:e2e` y `openspec validate --all --strict --no-interactive` en verde
+- [x] 5.2 `npm run build`, `npx astro check`, `npm run test`, `npm run test:e2e` y `openspec validate --all --strict --no-interactive` en verde

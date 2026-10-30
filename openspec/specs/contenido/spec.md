@@ -406,11 +406,19 @@ El sitio construido SHALL servir `/manual-openspec.pdf` con `Content-Type: appli
 - **THEN** el grupo «Recursos» del sidebar contiene un enlace a `/manual-openspec.pdf` y el sidebar sigue mostrando solo los siete grupos de primer nivel
 
 ### Requirement: Maquetación del manual como libro
-`/manual/` SHALL presentarse como un manual con portada (título «OpenSpec desde cero», subtítulo, autor y versión de OpenSpec de referencia), un capítulo «00 · Cómo usar este manual» con una ruta de lectura por días, un índice agrupado en partes y una cabecera numerada por sección. Las secciones de los grupos Empieza, Guías, Con tu agente y En equipo SHALL numerarse como capítulos («Capítulo 01», «Capítulo 02»…) y las de Referencia, Recursos y Cómo se hizo como anexos con letra («Anexo A», «Anexo B»…), conservando el orden del sidebar.
+`/manual/` SHALL presentarse como un manual con portada (título «OpenSpec desde cero», subtítulo, autor y versión de OpenSpec de referencia), una página con la infografía «OpenSpec: desarrollo guiado por especificaciones con IA», un capítulo «00 · Cómo usar este manual» con una ruta de lectura por días, un índice agrupado en partes y una cabecera numerada por sección. Las secciones de los grupos Empieza, Guías, Con tu agente y En equipo SHALL numerarse como capítulos («Capítulo 01», «Capítulo 02»…) y las de Referencia, Recursos y Cómo se hizo como anexos con letra («Anexo A», «Anexo B»…), conservando el orden del sidebar.
 
 #### Scenario: Portada del manual
 - **WHEN** se carga `/manual/`
 - **THEN** la primera sección contiene el título «OpenSpec desde cero», el nombre del autor y la versión de OpenSpec de referencia del sitio
+
+#### Scenario: Infografía tras la portada
+- **WHEN** se carga `/manual/`
+- **THEN** la sección inmediatamente posterior a la portada contiene la figura con nombre accesible «OpenSpec: desarrollo guiado por especificaciones con IA» y precede a la sección «Cómo usar este manual»
+
+#### Scenario: Infografía en una página propia al imprimir
+- **WHEN** se emula el medio de impresión en `/manual/` con tamaño A4
+- **THEN** la sección de la infografía empieza en una página nueva, la siguiente sección empieza también en una página nueva y la altura de la infografía no supera el área imprimible de una página
 
 #### Scenario: Capítulo de cómo usar el manual
 - **WHEN** se carga `/manual/`
