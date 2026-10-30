@@ -88,3 +88,17 @@ export function validateGuideFrontmatter(id: string, data: Record<string, unknow
 	}
 	return issues;
 }
+
+/** Verdicts allowed in the mapping table of /agentes/skills/ (w17). */
+export const SKILL_VERDICTS = ['Adoptar', 'Probar', 'Inspirarse', 'Opcional', 'No usar'] as const;
+export type SkillVerdict = (typeof SKILL_VERDICTS)[number];
+
+/** Returns one issue per row whose verdict is not in SKILL_VERDICTS; empty when every row is valid. */
+export function invalidSkillVerdicts(rows: readonly { skill: string; verdict: string }[]): string[] {
+	return rows
+		.filter((row) => !(SKILL_VERDICTS as readonly string[]).includes(row.verdict.trim()))
+		.map(
+			(row) =>
+				`[contenido] La skill "${row.skill}" tiene un veredicto no permitido: "${row.verdict}" (permitidos: ${SKILL_VERDICTS.join(', ')})`,
+		);
+}

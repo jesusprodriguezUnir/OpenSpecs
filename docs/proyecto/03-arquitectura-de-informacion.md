@@ -16,9 +16,11 @@
 | | config.yaml y schemas personalizados | `/guias/configuracion/` | 03 | avanzado |
 | **Con tu agente** | Claude Code | `/agentes/claude-code/` | 07 | intermedio |
 | | Otros agentes (Copilot, Cursor, Codex…) | `/agentes/otros/` | 01, 02 | intermedio |
+| | Skills complementarias | `/agentes/skills/` | 11 | intermedio |
 | **En equipo** | Integración con Jira | `/equipo/jira/` | 06 | avanzado |
 | | Integración con Azure DevOps | `/equipo/azure-devops/` | 06 | avanzado |
 | | Pipeline y validación en CI | `/equipo/ci/` | 06, 08 | avanzado |
+| | Gobierno del cambio | `/equipo/gobierno/` | 12, 09 | avanzado |
 | | Plan de adopción y riesgos | `/equipo/adopcion/` | 09 | avanzado |
 | **Referencia** | Comandos de chat `/opsx:*` | `/referencia/comandos-chat/` | 05 + 07-novedades | — |
 | | CLI `openspec` | `/referencia/cli/` | 03 + 07-novedades | — |

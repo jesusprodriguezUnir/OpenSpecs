@@ -1,8 +1,8 @@
 ---
 title: "FAQ"
-description: "Preguntas frecuentes sobre OpenSpec 1.14: specs frente a changes, cuándo archivar, refactors y bugs, Jira y Azure DevOps, idioma de las specs y telemetría."
+description: "Preguntas frecuentes sobre OpenSpec 1.14: specs y changes, cuándo archivar, bugs, validación y verja, skills, Jira y Azure DevOps, idioma y telemetría."
 openspecVersion: "1.14.0"
-lastReviewed: 2026-10-04
+lastReviewed: 2026-10-30
 sidebar:
   order: 5
 ---
@@ -41,7 +41,15 @@ Itera sobre el mismo change. En 1.14, `/opsx:update` revisa los artefactos de pl
 
 ### ¿Cómo evito que las specs se queden desactualizadas?
 
-Archive en la PR, `openspec validate --all --strict --no-interactive` en la pipeline, hook `Stop` en Claude Code, subagente verificador y una regla en `CLAUDE.md` que prohíba editar `specs/` directamente.
+Archive en la PR, `openspec validate --all --strict --no-interactive` en la pipeline, hook `Stop` en Claude Code, subagente verificador, CODEOWNERS sobre `openspec/specs/` y una regla en `CLAUDE.md` que prohíba editar `specs/` directamente.
+
+### Si `openspec validate` pasa, ¿la spec es correcta?
+
+No. El validador comprueba la estructura y el formato, no el significado. La corrección la garantizan la revisión humana de la delta spec y el test de cada escenario. Más en [Gobierno del cambio](/equipo/gobierno/).
+
+### ¿El hook `Stop` sustituye a la pipeline?
+
+No. El hook detecta errores pronto en local, pero no bloquea un merge. La verja real es la pipeline registrada como validación obligatoria en `main`. Más en [Gobierno del cambio](/equipo/gobierno/).
 
 ### ¿Qué hago con un cambio urgente sin tiempo para specs?
 
@@ -72,6 +80,18 @@ No. Elige una sola fuente; recomendamos `tasks.md`.
 ### ¿Qué pasa si front y back están en repositorios distintos?
 
 Puedes guardar las specs en el repositorio que define el contrato (normalmente el backend) o usar stores: repositorios OpenSpec independientes que se gestionan con `openspec store`.
+
+### ¿Las skills de terceros sustituyen a OpenSpec?
+
+No. Son piezas sueltas que refuerzan fases concretas: interrogar el ticket antes de proponer, TDD y diagnóstico de bugs al implementar, revisión y retrospectiva al cerrar. Evita las que solapan con `/opsx:propose` o con `tasks.md`. Más en [Skills complementarias](/agentes/skills/).
+
+### ¿Instalo las skills como plugin o como ficheros?
+
+En los repositorios del equipo, como ficheros versionados en `.claude/skills/`, para revisar cada actualización por PR. El plugin que se actualiza solo, mejor para uso personal. Más en [Skills complementarias](/agentes/skills/).
+
+### ¿Dónde vive el glosario de dominio?
+
+En un único `GLOSSARY.md` en la raíz, referenciado desde `openspec/config.yaml`. Así lo usan tanto OpenSpec como las skills de dominio. Más en [Skills complementarias](/agentes/skills/).
 
 ### ¿En qué idioma escribo las specs?
 

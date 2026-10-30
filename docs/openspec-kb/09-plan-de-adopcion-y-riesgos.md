@@ -9,9 +9,9 @@ Adoptar spec-driven development con OpenSpec y Claude Code en los proyectos .NET
 | Fase | Duración | Alcance | Criterio de salida |
 |---|---|---|---|
 | 0. Preparación | 1 semana | Formación (ruta del fichero 02), elección del proyecto piloto, revisión con DPO | Equipo con el modelo mental; piloto elegido |
-| 1. Piloto manual | Sprints 1–2 | `openspec init`, `CLAUDE.md`, `config.yaml`, convención de nombres, revisión de specs en PR. **Sin MCP** | ≥ 5 changes archivados; feedback del equipo |
+| 1. Piloto manual | Sprints 1–2 | `openspec init`, `CLAUDE.md`, `config.yaml`, convención de nombres, revisión de specs en PR. Skills `grill-with-docs` y `tdd` (fichero 11). **Sin MCP** | ≥ 5 changes archivados; feedback del equipo |
 | 2. Integración backlog | Sprint 3 | MCP de Jira/Azure DevOps en solo lectura; comando `/ticket-propose` | Propuestas generadas desde tickets sin retrabajo mayor |
-| 3. Automatización | Sprint 4+ | Pipeline con `openspec validate`, hook `Stop`, subagente verificador, automatizaciones de estado | Pipeline obligatoria en `main` |
+| 3. Automatización | Sprint 4+ | Pipeline con `openspec validate` como Build Validation obligatoria (la "verja", fichero 12), hook `Stop`, subagente verificador (comparado con la skill `code-review`), CODEOWNERS sobre `openspec/specs/`, automatizaciones de estado | Pipeline obligatoria en `main` |
 | 4. Extensión | Posterior | Resto de proyectos; Stores (beta) para specs compartidas entre repos front/back; revisión automática en CI | Adopción en todos los repos activos |
 
 ## Elección del proyecto piloto
@@ -21,9 +21,10 @@ Criterios: aplicación en mantenimiento activo, cobertura de tests razonable, eq
 ## Definition of Done (añadidos)
 
 - [ ] Change OpenSpec creado y propuesta revisada antes de implementar (o etiqueta `no-spec` justificada).
-- [ ] Cada Scenario cubierto por un test automatizado.
+- [ ] Tests de los Scenarios escritos y vistos en rojo antes de implementar (cambios con comportamiento nuevo o bugfix).
+- [ ] Cada Scenario cubierto por un test automatizado; tabla del `spec-verifier` sin filas "sin cubrir".
 - [ ] Change archivado en la misma PR; `openspec/specs/` actualizado.
-- [ ] `openspec validate --strict` en verde.
+- [ ] `openspec validate --strict` en verde en la pipeline (no basta con el verde local).
 
 ## Métricas para evaluar el piloto
 
@@ -31,8 +32,11 @@ Criterios: aplicación en mantenimiento activo, cobertura de tests razonable, eq
 - **Defectos escapados** en las historias con spec frente a las que no la tienen.
 - **Tiempo de ciclo** por historia (el esperado es igual o menor tras la curva de aprendizaje).
 - **Cobertura de escenarios:** % de Scenarios con test (objetivo 100 %).
+- **Omisiones detectadas** antes del merge (por revisión de propuesta, `spec-verifier` o `code-review`).
 - **Coste en tokens** por historia.
 - **Percepción del equipo** (encuesta breve en la retrospectiva).
+
+Criterio de corte: si sube la trazabilidad pero también los defectos y el tiempo de ciclo sin reducir riesgos, el enfoque no ha demostrado valor y hay que replantearlo.
 
 ## Riesgos y mitigaciones
 
@@ -42,7 +46,12 @@ Criterios: aplicación en mantenimiento activo, cobertura de tests razonable, eq
 | Backfilling masivo de specs | Semanas perdidas documentando código que no cambia | Política brownfield: solo specs de lo que se toca |
 | Datos personales en tickets y código enviados al modelo | Incumplimiento RGPD | Revisión con DPO; plantilla de ticket sin datos reales; `deny` de ficheros sensibles |
 | Specs desalineadas con el código | Pérdida de confianza en las specs | Archive dentro de la PR; validación en pipeline; subagente verificador |
+| "Válido" confundido con "correcto" | Specs bien formadas pero erróneas pasan la pipeline | El validador solo comprueba forma; revisión humana de significado + trazabilidad Scenario → test |
+| `specs/` actualizado fuera de una PR (sync o edición manual) | La "verdad vigente" se adelanta a la ratificación | Archive solo en PR; CODEOWNERS y rama protegida sobre `openspec/specs/` |
+| El agente ajusta los tests para que pasen | Falsa conformidad | Tests de Scenarios escritos y revisados antes de implementar; revisar en la PR cualquier cambio posterior en ellos |
 | Agente modificando el backlog | Estados incoherentes, mala trazabilidad | MCP en solo lectura; estados por automatizaciones nativas |
+| Skills de terceros auto-actualizadas (plugin) | Cambio de comportamiento del agente sin revisión (supply chain) | Instalar skills como ficheros versionados en `.claude/skills/`; actualizar por PR |
+| Solape de comandos (`to-spec`/`to-tickets` vs `/opsx:*`) | Confusión y artefactos duplicados | Selección cerrada de skills (fichero 11); una sola fuente para specs y tareas |
 | Tutoriales y versiones desactualizadas | Confusión de comandos | Versión fijada; manda `docs/` del repo; `openspec update` controlado |
 | Rotura por actualización de OpenSpec | Pipeline o comandos rotos | Versión fijada en CI; actualizar en rama dedicada |
 | Limitación del MCP remoto de Azure DevOps con Claude | Integración más costosa | Servidor local con `az login`; revisar cuando Entra soporte registro dinámico |
@@ -55,6 +64,8 @@ Criterios: aplicación en mantenimiento activo, cobertura de tests razonable, eq
 - [ ] Telemetría desactivada.
 - [ ] `openspec init` con Claude Code en el repo piloto.
 - [ ] `CLAUDE.md` y `openspec/config.yaml` redactados con el stack y dominio reales.
+- [ ] Skills seleccionadas instaladas como ficheros en `.claude/skills/` (fichero 11).
+- [ ] Glosario único (`GLOSSARY.md`) referenciado desde `config.yaml`.
 - [ ] Convención de nombres acordada y documentada.
 - [ ] Plantilla de PR actualizada.
 - [ ] DoD actualizada.

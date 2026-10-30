@@ -2,10 +2,10 @@
 title: "Plan de adopción y riesgos"
 description: "Plan por fases para adoptar OpenSpec en un equipo: elección del piloto, definición de hecho, métricas, riesgos con su mitigación y checklist de arranque."
 openspecVersion: "1.14.0"
-lastReviewed: 2026-10-04
+lastReviewed: 2026-10-30
 level: avanzado
 sidebar:
-  order: 4
+  order: 5
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -17,9 +17,9 @@ Adoptar desarrollo guiado por specs sin añadir burocracia al flujo Scrum exige 
 | Fase | Duración | Alcance | Criterio de salida |
 |---|---|---|---|
 | 0. Preparación | 1 semana | Formación, elección del piloto, revisión con protección de datos | El equipo tiene el modelo mental y el piloto está elegido |
-| 1. Piloto manual | Sprints 1–2 | `openspec init`, `CLAUDE.md`, `config.yaml`, convención de nombres, revisión de specs en la PR. **Sin MCP** | 5 o más changes archivados y feedback del equipo |
+| 1. Piloto manual | Sprints 1–2 | `openspec init`, `CLAUDE.md`, `config.yaml`, convención de nombres, revisión de specs en la PR y las [skills](/agentes/skills/) `grill-with-docs` y `tdd`. **Sin MCP** | 5 o más changes archivados y feedback del equipo |
 | 2. Integración con el backlog | Sprint 3 | MCP de solo lectura y comando de ticket a propuesta | Propuestas generadas desde tickets sin retrabajo mayor |
-| 3. Automatización | Sprint 4 en adelante | [Validación en CI](/equipo/ci/), hook `Stop`, subagente verificador, estados por automatización | Pipeline obligatoria en `main` |
+| 3. Automatización | Sprint 4 en adelante | [Validación en CI](/equipo/ci/) como validación obligatoria (la [verja](/equipo/gobierno/)), hook `Stop`, subagente verificador, CODEOWNERS sobre `openspec/specs/` y estados por automatización | Pipeline obligatoria en `main` |
 | 4. Extensión | Posterior | Resto de proyectos y revisión automática en CI | Adopción en todos los repositorios activos |
 
 ## Elegir el proyecto piloto
@@ -31,9 +31,10 @@ Busca una aplicación en mantenimiento activo, con cobertura de tests razonable,
 Añade a la definición de hecho del equipo:
 
 - [ ] Change creado y propuesta revisada antes de implementar (o etiqueta `no-spec` justificada).
-- [ ] Cada escenario cubierto por un test automatizado.
+- [ ] Tests de los escenarios escritos y vistos en rojo antes de implementar, en cambios con comportamiento nuevo o bugfix.
+- [ ] Cada escenario cubierto por un test automatizado; la tabla del verificador no tiene filas «sin cubrir».
 - [ ] Change archivado en la misma PR y `openspec/specs/` actualizado.
-- [ ] `openspec validate --strict` en verde.
+- [ ] `openspec validate --strict` en verde en la pipeline; el verde local no basta.
 
 ## Métricas para evaluar el piloto
 
@@ -41,8 +42,11 @@ Añade a la definición de hecho del equipo:
 - **Defectos escapados** en historias con spec frente a las que no la tienen.
 - **Tiempo de ciclo** por historia: igual o menor tras la curva de aprendizaje.
 - **Cobertura de escenarios**: porcentaje con test; el objetivo es el 100 %.
+- **Omisiones detectadas antes del merge**, por la revisión de la propuesta o por el verificador.
 - **Coste en tokens** por historia.
 - **Percepción del equipo**, con una encuesta breve en la retrospectiva.
+
+Criterio de corte: si sube la trazabilidad pero también los defectos y el tiempo de ciclo sin reducir riesgos, el enfoque no ha demostrado valor y hay que replantearlo.
 
 ## Riesgos y mitigaciones
 
@@ -52,7 +56,12 @@ Añade a la definición de hecho del equipo:
 | Rellenar specs de todo el código existente | Política brownfield: solo specs de lo que se toca. Ver [proyectos existentes](/guias/brownfield/) |
 | Datos personales en tickets y código enviados al modelo | Revisión con protección de datos, plantilla de ticket sin datos reales y `deny` de ficheros sensibles |
 | Specs desalineadas con el código | Archive dentro de la PR, validación en la pipeline y subagente verificador |
+| «Válido» confundido con «correcto»: specs bien formadas pero erróneas pasan la pipeline | El validador solo comprueba la forma; revisión humana del significado y trazabilidad de cada escenario a su test. Ver [Gobierno del cambio](/equipo/gobierno/) |
+| `openspec/specs/` actualizado fuera de una PR | Archive solo dentro de la PR, CODEOWNERS y rama protegida sobre esa carpeta |
+| El agente ajusta los tests para que pasen | Tests de los escenarios escritos y revisados antes de implementar; cualquier cambio posterior en ellos se revisa en la PR |
 | El agente modifica el backlog | MCP en solo lectura y estados por automatizaciones nativas |
+| Skills de terceros que se actualizan solas | Cambian el comportamiento del agente sin revisión: instálalas como ficheros versionados y actualízalas por PR. Ver [Skills complementarias](/agentes/skills/) |
+| Solape de comandos de skills con `/opsx:*` | Selección cerrada de skills; una sola fuente para specs y tareas |
 | Versiones y tutoriales desactualizados | Versión fijada y `openspec update` controlado |
 | Rotura por actualizar OpenSpec | Versión fijada en CI y actualización en una rama dedicada |
 | Limitación del MCP remoto de Azure DevOps con Claude Code | Servidor local; revisa el estado periódicamente |
@@ -69,6 +78,8 @@ Antes de conectar un agente a tickets, código o repositorios con datos personal
 - [ ] Telemetría desactivada.
 - [ ] `openspec init` ejecutado con las herramientas que usa el equipo.
 - [ ] `CLAUDE.md` y `openspec/config.yaml` redactados con el stack y el dominio reales.
+- [ ] Skills seleccionadas instaladas como ficheros versionados en `.claude/skills/`.
+- [ ] Glosario único (`GLOSSARY.md`) referenciado desde `config.yaml`.
 - [ ] Convención de nombres acordada y documentada.
 - [ ] Plantilla de PR y Definition of Done actualizadas.
 - [ ] Delegado de protección de datos informado.
