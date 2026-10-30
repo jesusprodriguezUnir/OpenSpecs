@@ -34,7 +34,7 @@ test.describe('contenido: manual', () => {
 		await page.goto('/manual/');
 		const sections = await page.locator('[data-manual-section]').evaluateAll((s) => s.map((e) => e.id));
 		const hrefs = await page.locator('nav.toc a').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
-		expect(hrefs).toEqual(['#como-usar-este-manual', ...sections.map((id) => `#${id}`)]);
+		expect(hrefs).toEqual(['#como-usar-este-manual', ...sections.map((id) => `#${id}`), '#colofon']);
 		for (const id of sections) await expect(page.locator(`[id="${id}"]`)).toHaveCount(1);
 	});
 
@@ -175,5 +175,49 @@ test.describe('contenido: manual en PDF', () => {
 		await expect(link).toContainText('Manual en PDF');
 		await expect(link).toContainText(/\d+,\d MB/);
 		await expect(page.locator(`${SIDEBAR} ul.top-level > li`)).toHaveCount(7);
+	});
+});
+
+test.describe('contenido: colofón del manual', () => {
+	test('Scenario: Colofón al final del manual', async ({ page }) => {
+		await page.goto('/manual/');
+		const last = page.locator('[data-manual] > section').last();
+		await expect(last).toHaveAttribute('data-manual-colophon', '');
+		await expect(last.locator('h2')).toHaveText('Colofón');
+		const order = await page
+			.locator('[data-manual] > section')
+			.evaluateAll((s) => s.map((e) => (e.hasAttribute('data-manual-colophon') ? 'colofon' : e.hasAttribute('data-manual-section') ? 'section' : 'other')));
+		expect(order.lastIndexOf('section')).toBe(order.length - 2);
+	});
+
+	test('Scenario: Ficha de edición coherente con la portada', async ({ page }) => {
+		await page.goto('/manual/');
+		const cover = (await page.locator('[data-manual-version]').textContent())?.trim() ?? '';
+		const version = (await page.locator('[data-colophon-version]').textContent())?.trim() ?? '';
+		const edition = (await page.locator('[data-colophon-edition]').textContent())?.trim() ?? '';
+		expect(version).toMatch(/^OpenSpec v\d+\.\d+\.\d+$/);
+		expect(cover).toBe(edition ? `${version} · ${edition}` : version);
+	});
+
+	test('Scenario: Edición en línea y fuentes', async ({ page }) => {
+		await page.goto('/manual/');
+		const site = await page.locator('[data-colophon-site]').getAttribute('href');
+		expect(site).toMatch(/^https?:\/\/[^/]+\/$/);
+		const external = await page
+			.locator('[data-manual-colophon] .colophon-sources a')
+			.evaluateAll((as) => as.map((a) => a.getAttribute('href') ?? ''));
+		expect(external.filter((h) => h.startsWith('https://')).length).toBeGreaterThanOrEqual(3);
+	});
+
+	test('Scenario: Colofón sin numerar', async ({ page }) => {
+		await page.goto('/manual/');
+		await expect(page.locator('[data-manual-colophon] [data-manual-label]')).toHaveCount(0);
+		await expect(page.locator('[data-manual-colophon]')).not.toContainText(/Capítulo|Anexo/);
+		const numbered = await page
+			.locator('nav.toc li')
+			.evaluateAll((lis) =>
+				lis.filter((li) => (li.querySelector('.num')?.textContent ?? '').trim() !== '').map((li) => li.querySelector('a')?.getAttribute('href')),
+			);
+		expect(numbered).not.toContain('#colofon');
 	});
 });

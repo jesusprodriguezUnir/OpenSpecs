@@ -1,0 +1,95 @@
+---
+title: "Gobierno del cambio"
+description: "Cuándo una spec manda de verdad: espectro de autoridad, verja frente a detección temprana, reparto de papeles, cierre calculado y lo que OpenSpec deja fuera."
+openspecVersion: "1.14.0"
+lastReviewed: 2026-10-30
+level: avanzado
+sidebar:
+  order: 4
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+OpenSpec da la estructura (specs vigentes, changes con deltas y un validador), pero no decide por sí solo **quién ratifica, qué bloquea un merge ni cuándo un cambio está cerrado**. Esta página recoge el marco de gobierno que conviene montar alrededor de la herramienta. Se apoya en el documento técnico *Desarrollo de Software Basado en Especificaciones* de Roberto Canales, que compara OpenSpec, Spec Kit, Kiro y Tessl por mecanismos (ver [Recursos](/recursos/)).
+
+## Funciona no es lo mismo que es conforme
+
+Que la cancelación de reservas «funcione» se comprueba con una demo. Que sea **conforme** exige compararla con un comportamiento acordado de antemano, por ejemplo «una reserva solo se cancela sin coste con 24 h de antelación», y dejar evidencia reproducible: el escenario y su test en verde en la pipeline.
+
+De ahí sale la primera regla: **la conversación con el agente no puede ser el único sitio donde vive la intención**. Lo que tenga que sobrevivir a la sesión va a ficheros versionados. `CLAUDE.md` aporta contexto, las skills procedimiento y los hooks automatismo. Los tres mejoran al agente, pero ninguno especifica el comportamiento del producto. Eso lo hace la spec.
+
+## Espectro de autoridad de la spec
+
+| Modelo | Qué manda después de implementar | Riesgo típico |
+|---|---|---|
+| [Spec-first](/referencia/glosario/#spec-first) | El código. La spec se escribió antes y luego envejece | Documentación que miente a los seis meses |
+| [Spec-anchored](/referencia/glosario/#spec-anchored) | La spec ratificada sigue siendo normativa; la deriva se controla con revisión y tests | Revisiones «de trámite» que dejan pasar deriva |
+| [Spec-as-source](/referencia/glosario/#spec-as-source) | La spec. La salida generada no se edita: se cambia la spec y se regenera | Exige regeneración repetible y detectar ediciones manuales |
+
+OpenSpec encaja en **spec-anchored por cambios**: cada change propone deltas sobre `openspec/specs/`, que sigue siendo la verdad vigente tras archivar. Es el punto de partida recomendado. Mueve un módulo a spec-as-source solo cuando tengas regeneración repetible, detección de ediciones manuales y una CI que lo proteja.
+
+## Detección temprana frente a verja
+
+Una [verja](/referencia/glosario/#verja) combina tres piezas: una **comprobación ejecutable**, una **política obligatoria** y un **bloqueo efectivo**. Si falta una, no es una verja.
+
+| Mecanismo | Qué es | Bloquea el merge |
+|---|---|---|
+| Hook `Stop` de Claude Code | Detección temprana: avisa en local al terminar el turno | No |
+| `openspec validate` en el portátil | Comprobación sin política: depende de que alguien la ejecute | No |
+| Pipeline con `openspec validate --all --strict`, build y tests, registrada como validación obligatoria de la rama `main` | Verja | Sí |
+
+Mantén las tres, pero no las confundas: un verde local no protege `main`. Junto a la verja funciona el [trinquete](/referencia/glosario/#trinquete), que permite avanzar sin dejar que la calidad retroceda. Por ejemplo, la cobertura de escenarios de un dominio no puede bajar de un change al siguiente. La configuración de la pipeline está en [Validación en CI](/equipo/ci/).
+
+## Quién propone, quién ratifica, quién comprueba
+
+| Papel | Responsable | Ejemplo con reservas |
+|---|---|---|
+| Propone | El agente | `/opsx:propose` genera la delta spec de cancelación con sus escenarios |
+| Ratifica | Una persona | El revisor aprueba la PR de la propuesta sobre un commit concreto |
+| Comprueba | Un programa | La pipeline ejecuta el validador y el test de cada escenario |
+
+Ningún mecanismo debe permitir que el modelo ratifique su propio resultado. En la práctica, esto implica tres cosas:
+
+- **Ratificación ligada a una versión.** La aprobación es una aprobación de PR o un comentario con el commit revisado, no un «ok» en el chat.
+- **Tests aprobados protegidos.** Escribe primero los tests de los escenarios, revísalos con la propuesta y comprueba que fallan (en rojo) antes de `/opsx:apply`. En la PR, cualquier cambio posterior en esos tests se revisa aparte, para que el agente no los «ajuste» hasta que pasen.
+- **Specs protegidas.** `openspec/specs/` solo cambia al archivar dentro de la PR.
+
+## El cierre se calcula, no se declara
+
+Un change no está terminado porque el agente diga «he terminado». Está terminado cuando el [cierre calculado](/referencia/glosario/#cierre-calculado) lo deduce de artefactos y resultados:
+
+- todas las filas de la matriz de cobertura verificadas;
+- la CI en verde sobre el mismo commit que se va a fusionar;
+- las aprobaciones requeridas presentes.
+
+La matriz de cobertura es la tabla que produce el subagente verificador y que acompaña a la PR:
+
+| Requirement | Scenario | Código | Test | Estado |
+|---|---|---|---|---|
+| Cancelación sin coste | Cancelación con más de 24 h | `CancelarReserva` | `Scenario: Cancelación con más de 24 h` | Cubierto |
+| Cancelación sin coste | Cancelación con menos de 24 h | `CancelarReserva` | — | **Sin cubrir** |
+
+Una sola fila «sin cubrir» bloquea la Definition of Done. Para que la trazabilidad funcione, enlaza cada eslabón por su identificador: intención (ticket) → change → requirement → scenario → test → código → ejecución de CI.
+
+## Lo que OpenSpec deja fuera
+
+OpenSpec aporta la separación entre spec vigente y propuesta, deltas por capacidad (ADDED, MODIFIED, REMOVED y RENAMED), un validador determinista de estructura y un histórico navegable. Estas son las carencias que tiene que cubrir el equipo:
+
+| Carencia | Cómo cubrirla |
+|---|---|
+| La sincronización puede adelantar la «verdad vigente» antes del cierre autorizado | Fusionar en `openspec/specs/` solo al archivar dentro de la PR, y proteger esa carpeta con CODEOWNERS y rama protegida |
+| `config.yaml` orienta al agente, pero no concede permisos ni protege rutas | Permisos reales: `deny` de escritura sobre `openspec/specs/**` en la configuración del agente y política de rama en el repositorio |
+| «Válido» no significa «correcto»: el validador comprueba la forma, no el significado | Revisión humana de la delta spec con checklist y trazabilidad de cada escenario a su test |
+| Ninguna herramienta garantiza el comportamiento | Los tests son del proyecto: cada escenario tiene un test automatizado en la verja |
+
+<Aside type="note" title="No hay ganador universal">
+La comparativa del documento concluye que la elección depende de dónde deba vivir la autoridad. Spec Kit aporta una «constitución», pero no separa la spec vigente de la propuesta. Kiro integra la disciplina en el IDE, pero sus puertas son un modo de uso, no una política. Tessl versiona el contexto, pero versionar no equivale a ratificar.
+</Aside>
+
+## Medir antes de optimizar
+
+El gobierno añade pasos, así que tiene que demostrar valor. Usa las métricas del [plan de adopción](/equipo/adopcion/). Si sube la trazabilidad, pero también los defectos y el tiempo de ciclo sin reducir riesgos, el enfoque no está funcionando y hay que replantearlo.
+
+## Siguiente paso
+
+[Plan de adopción y riesgos](/equipo/adopcion/)

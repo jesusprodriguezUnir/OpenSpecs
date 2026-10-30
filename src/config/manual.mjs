@@ -16,6 +16,12 @@ export function formatPdfSize(bytes) {
 /** Size label of the committed PDF, written by the generation script into src/data/manual.json. */
 export const MANUAL_PDF_SIZE = formatPdfSize(manual.bytes);
 
+/**
+ * Public online edition printed in the colophon. Fixed (not Astro.site) so the manual fingerprint does
+ * not depend on the SITE_URL of whoever builds it (local, CI or Vercel).
+ */
+export const MANUAL_ONLINE_URL = 'https://openspec-ochre.vercel.app/';
+
 /** Author shown on the manual cover. */
 export const MANUAL_AUTHOR = 'Jesús Pedro Rodríguez';
 
@@ -38,13 +44,41 @@ export const MANUAL_READING_ROUTE = [
 	},
 	{
 		when: 'Día 4',
-		what: 'Redactar config.yaml y las instrucciones del agente para un proyecto real del equipo.',
-		slugs: ['guias/brownfield', 'guias/configuracion', 'agentes/claude-code'],
+		what: 'Redactar config.yaml y las instrucciones del agente para un proyecto real del equipo, y elegir las skills que lo acompañan.',
+		slugs: ['guias/brownfield', 'guias/configuracion', 'agentes/claude-code', 'agentes/skills'],
 	},
 	{ when: 'Día 5', what: 'Primer change real y pequeño: un bugfix o una funcionalidad acotada.', slugs: ['guias/recetas'] },
 	{
 		when: 'Sprints siguientes',
-		what: 'Conectar el backlog y la pipeline y extender el método al equipo.',
-		slugs: ['equipo/jira', 'equipo/azure-devops', 'equipo/ci', 'equipo/adopcion'],
+		what: 'Conectar el backlog y la pipeline, fijar el gobierno del cambio y extender el método al equipo.',
+		slugs: ['equipo/jira', 'equipo/azure-devops', 'equipo/ci', 'equipo/gobierno', 'equipo/adopcion'],
+	},
+];
+
+/**
+ * Main sources listed in the manual colophon (w17). Absolute https URLs only; the full catalogue
+ * lives in src/data/resources.yaml (/recursos/).
+ * @type {readonly { title: string; url: string; note: string }[]}
+ */
+export const MANUAL_SOURCES = [
+	{
+		title: 'OpenSpec (Fission-AI)',
+		url: 'https://github.com/Fission-AI/OpenSpec',
+		note: 'Repositorio, CLI y documentación oficial (carpeta docs/).',
+	},
+	{
+		title: 'openspec.dev',
+		url: 'https://openspec.dev',
+		note: 'Web oficial del proyecto.',
+	},
+	{
+		title: 'Roberto Canales — Desarrollo de Software Basado en Especificaciones',
+		url: 'https://robertocanales.com/proyectos/libro-sdd',
+		note: 'Marco de gobierno del cambio: espectro de autoridad, verja y cierre calculado.',
+	},
+	{
+		title: 'Matt Pocock — Skills',
+		url: 'https://github.com/mattpocock/skills',
+		note: 'Colección de skills de agente que complementan el flujo /opsx.',
 	},
 ];

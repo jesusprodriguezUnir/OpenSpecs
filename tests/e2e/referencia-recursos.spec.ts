@@ -175,3 +175,27 @@ test.describe('busqueda', () => {
 		await expect(page.locator('dialog')).toContainText('Ningún resultado');
 	});
 });
+
+test.describe('recursos complementarios', () => {
+	test('Scenario: Anclas de gobierno', async ({ page }) => {
+		await page.goto('/referencia/glosario/');
+		for (const id of ['spec-first', 'spec-anchored', 'spec-as-source', 'verja', 'trinquete', 'cierre-calculado']) {
+			await expect(page.locator(`main h3[id="${id}"]`), id).toHaveCount(1);
+		}
+	});
+
+	test('Scenario: Recursos complementarios listados', async ({ page }) => {
+		await page.goto('/recursos/');
+		for (const url of ['https://github.com/mattpocock/skills', 'https://robertocanales.com/proyectos/libro-sdd']) {
+			await expect(page.locator(`.resources li a[href="${url}"]`), url).toHaveCount(1);
+		}
+	});
+
+	test('Scenario: Recurso en español marcado', async ({ page }) => {
+		await page.goto('/recursos/');
+		const item = page.locator('.resources li[data-type]').filter({
+			has: page.locator('a[href="https://robertocanales.com/proyectos/libro-sdd"]'),
+		});
+		await expect(item.locator('.resource-lang')).toHaveText('Español');
+	});
+});

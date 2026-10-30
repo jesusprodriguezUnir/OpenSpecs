@@ -1,0 +1,75 @@
+---
+title: "Skills complementarias"
+description: "Qué skills de terceros conviene enchufar alrededor de /opsx:* (interrogar el ticket, TDD, diagnóstico de bugs, revisión, retro), cuáles no y cómo instalarlas."
+openspecVersion: "1.14.0"
+lastReviewed: 2026-10-30
+level: intermedio
+sidebar:
+  order: 3
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+OpenSpec decide **qué** se construye y deja constancia en Git. Cómo trabaja el agente en cada fase (preguntar antes de proponer, escribir el test en rojo, diagnosticar un bug) se puede reforzar con *skills*: carpetas con un `SKILL.md` que empaquetan un procedimiento reutilizable. Esta página analiza la colección de Matt Pocock (licencia MIT, [ver Recursos](/recursos/)), pensada como piezas sueltas que el equipo controla. No compite con OpenSpec: se enchufa alrededor.
+
+<Aside type="caution" title="Recomendación para un piloto · contrastada el 25 de octubre de 2026">
+El catálogo de skills cambia a menudo. Los veredictos de esta página son un punto de partida para un piloto, no una norma. Antes de adoptar una skill, revisa su `CHANGELOG.md` y mide su efecto con las métricas del [plan de adopción](/equipo/adopcion/).
+</Aside>
+
+## Dos tipos de skill
+
+| Tipo | Quién la invoca | Para qué sirve |
+|---|---|---|
+| Invocada por el usuario | Solo la persona, como comando (`/grill-me`) | Orquestar un flujo |
+| Invocada por el modelo | La persona o el agente, cuando la tarea encaja | Aportar una disciplina reutilizable (`tdd`, `code-review`) |
+
+Una skill invocada por el usuario puede apoyarse en skills invocadas por el modelo, pero no en otras skills de usuario. Por eso las skills de disciplina (`tdd`) combinan bien con `/opsx:apply`.
+
+## Qué usar en cada fase
+
+| Fase | Skill | Cómo encaja | Veredicto |
+|---|---|---|---|
+| Antes de `/opsx:propose` | `grill-with-docs` | Interroga el ticket hasta cerrar ambigüedades (límites, errores, casos simultáneos) y deja el glosario y las decisiones por escrito | Adoptar |
+| Contexto de dominio | `domain-modeling` | Afina el lenguaje del dominio contra casos límite; necesita un glosario único (ver conflictos) | Adoptar |
+| Propuesta | `to-spec` | Solapa con `/opsx:propose` y publica la spec en el gestor de tickets: rompe «el qué en el backlog, el cómo en Git» | No usar |
+| Desglose | `to-tickets` | Solapa con `tasks.md` y duplicaría las subtareas | No usar |
+| Implementación | `tdd` | Refuerza `/opsx:apply`: cada escenario empieza como un test en rojo | Adoptar |
+| Bugfix | `diagnosing-bugs` | Reproduce en rojo, minimiza, formula hipótesis y deja el test de regresión, que es el escenario del requisito MODIFIED | Adoptar |
+| Verificación | `code-review` | Su eje «Spec» comprueba si el código implementa fielmente la spec; compáralo con el subagente verificador | Probar |
+| PR | `pr` | Aporta riesgo de merge y evidencias antes y después; fusiónalo con tu plantilla de PR | Inspirarse |
+| Retrospectiva | `retro` | Propone mejoras del entorno del agente (reglas, hooks, comprobaciones) que entran por PR | Adoptar |
+| Deuda técnica | `improve-codebase-architecture` | Detecta candidatos de refactor, que entran como changes sin delta specs | Adoptar |
+| Sesiones largas | `handoff` | Compacta la conversación para que otra sesión continúe un change grande | Opcional |
+| Contexto del agente | `writing-for-agents` | Ayuda a redactar `CLAUDE.md`, `config.yaml` y skills propias | Adoptar |
+
+## Conflictos que resolver antes de instalar
+
+1. **Un solo glosario.** Las skills de dominio mantienen un `GLOSSARY.md`, y OpenSpec tiene el glosario en el `context` de `openspec/config.yaml`. Deja el glosario en `GLOSSARY.md`, en la raíz, y haz que `config.yaml` lo referencie («Usa la terminología de GLOSSARY.md»).
+2. **Una sola palabra para «spec».** La spec de `to-spec` es un PRD con historias de usuario. En el repositorio, *spec* significa siempre spec de OpenSpec: requisitos con SHALL y escenarios.
+3. **Un solo comando de implementación.** La colección trae `implement`. Usa `/opsx:apply`, que marca `tasks.md`, y añade a `CLAUDE.md`: «Durante apply, sigue la disciplina de la skill `tdd`».
+4. **Gestor de tickets.** El asistente de configuración solo trae plantillas para GitHub, GitLab y Markdown local. Con Jira o Azure DevOps, describe el flujo en prosa: «lectura vía MCP, nunca escritura; los estados los mueven automatizaciones nativas». Más en [Integración con Jira](/equipo/jira/).
+5. **Carpeta compartida.** `openspec init` y `openspec update` generan sus propias skills en `.claude/skills/`. Las de terceros conviven en la misma carpeta con nombres distintos; no edites las de OpenSpec.
+
+## Instalarlas como ficheros versionados
+
+Hay dos vías: un plugin que se actualiza solo o ficheros editables dentro del repositorio. En los repositorios del equipo, usa la segunda e instala solo las skills que hayas adoptado:
+
+```bash title="PowerShell o bash"
+npx skills@latest add mattpocock/skills -a claude-code
+```
+
+El comando pregunta qué skills instalar y las copia a `.claude/skills/`. Haz commit de esa carpeta. Para actualizar, ejecuta `npx skills@latest update` en una rama y revisa el diff en la PR como cualquier otro código. No es un comando de OpenSpec, así que su sintaxis puede cambiar: compruébala en el README del repositorio.
+
+<Aside type="danger" title="Skills y cadena de suministro">
+Una skill que se actualiza sola cambia el comportamiento del agente sin pasar por una revisión: es un riesgo de **cadena de suministro**, igual que una dependencia sin versión fijada. Con ficheros versionados, cada cambio se revisa como código. No combines plugin y ficheros, porque duplicarías las skills.
+</Aside>
+
+## Cómo introducirlas en el plan de adopción
+
+- **Piloto manual:** solo `grill-with-docs` y `tdd`. Mide si bajan las iteraciones en la revisión de la propuesta.
+- **Automatización:** prueba `code-review` junto al subagente verificador y quédate con el que detecte más huecos reales.
+- **Retrospectivas:** ejecuta `retro` sobre una sesión representativa y convierte sus hallazgos en cambios de `CLAUDE.md` o de los hooks, por PR.
+
+## Siguiente paso
+
+[Integración con Jira](/equipo/jira/)

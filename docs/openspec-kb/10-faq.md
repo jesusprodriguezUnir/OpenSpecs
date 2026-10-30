@@ -4,7 +4,7 @@
 No. OpenSpec está pensado para proyectos existentes: solo se escriben specs de lo que se va a cambiar. La documentación crece con cada change archivado.
 
 **¿Qué diferencia hay entre `openspec/specs` y `openspec/changes`?**
-`specs/` describe cómo se comporta el sistema hoy (fuente de verdad). `changes/` contiene propuestas en curso, expresadas como deltas (ADDED / MODIFIED / REMOVED). Al archivar un change, sus deltas se fusionan en `specs/`.
+`specs/` describe cómo se comporta el sistema hoy (fuente de verdad). `changes/` contiene propuestas en curso, expresadas como deltas (ADDED / MODIFIED / REMOVED / RENAMED). Al archivar un change, sus deltas se fusionan en `specs/`.
 
 **¿Cuándo se archiva un change?**
 Antes del merge, dentro de la misma PR, para que código y specs entren juntos en `main`.
@@ -13,7 +13,7 @@ Antes del merge, dentro de la misma PR, para que código y specs entren juntos e
 Se crea un change con propuesta y tareas, sin delta specs, y se archiva con `openspec archive <cambio> --skip-specs`.
 
 **¿Y los bugs?**
-Se proponen como comportamiento correcto con un requisito MODIFIED. El bug queda documentado y protegido por un test.
+Se proponen como comportamiento correcto con un requisito MODIFIED. El bug queda documentado y protegido por un test. La skill `diagnosing-bugs` (fichero 11) ayuda a reproducirlo en rojo antes de arreglarlo.
 
 **¿Qué modelos de IA puedo usar?**
 OpenSpec es agnóstico: depende de la herramienta. Con Claude Code usamos Claude: `opus` para explorar, proponer y verificar; `sonnet` para implementar.
@@ -31,7 +31,13 @@ No. Mejor automatizaciones de Jira / Azure DevOps disparadas por rama, PR y merg
 No. Elegir una sola fuente; recomendamos `tasks.md`.
 
 **¿Cómo evito que las specs se queden desactualizadas?**
-Archive en la PR, `openspec validate --strict` en la pipeline, hook `Stop` en Claude Code, subagente verificador y regla en `CLAUDE.md` de no editar `specs/` directamente.
+Archive en la PR, `openspec validate --strict` en la pipeline, hook `Stop` en Claude Code, subagente verificador, CODEOWNERS sobre `openspec/specs/` y regla en `CLAUDE.md` de no editar `specs/` directamente.
+
+**Si `openspec validate` pasa, ¿la spec es correcta?**
+No. El validador comprueba estructura y formato, no significado. La corrección la garantizan la revisión humana de la delta spec y los tests de cada Scenario (fichero 12).
+
+**¿El hook `Stop` sustituye a la pipeline?**
+No. El hook detecta errores pronto en local, pero no bloquea un merge. La "verja" real es la pipeline registrada como Build Validation obligatoria en `main`.
 
 **¿Qué hago con un cambio urgente sin tiempo para specs?**
 Etiqueta `no-spec` visible en la PR. Revisar su uso en las retrospectivas; si se abusa, el proceso se erosiona.
@@ -45,8 +51,17 @@ Opciones: specs en el repo del backend (el que define el contrato) o la funciona
 **¿OpenSpec sustituye a los tests?**
 No. Cada Scenario debe tener un test automatizado. Las specs dicen qué debe pasar; los tests lo garantizan.
 
+**¿Las skills de Matt Pocock sustituyen a OpenSpec?**
+No. Son piezas sueltas que complementan el flujo: `grill-with-docs` antes de proponer, `tdd` y `diagnosing-bugs` al implementar, `code-review` y `retro` al cerrar. Evitamos `to-spec` y `to-tickets` porque solapan con `/opsx:propose` y `tasks.md` (fichero 11).
+
+**¿Instalo las skills como plugin o como ficheros?**
+En repos del equipo, como ficheros versionados en `.claude/skills/` (`npx skills@latest add mattpocock/skills -a claude-code`), para revisar cada actualización por PR. El plugin auto-actualizable solo para uso personal.
+
+**¿Dónde vive el glosario de dominio?**
+En un único `GLOSSARY.md` en la raíz, referenciado desde `openspec/config.yaml`. Así lo usan tanto OpenSpec como las skills de dominio.
+
 **¿Cómo lo aprendo rápido?**
-`/opsx:onboard` sobre tu propio código, más la ruta del fichero 02.
+`/opsx:onboard` sobre tu propio código, más la ruta del fichero 02 y el documento técnico de Roberto Canales para el criterio de fondo.
 
 **¿Envía datos OpenSpec a algún sitio?**
 Solo telemetría anónima (nombre de comando y versión), desactivable con `openspec config set telemetry.enabled false` u `OPENSPEC_TELEMETRY=0`. El contenido de specs y código lo procesa el modelo de IA de la herramienta que uses, no OpenSpec.

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { requiredFieldsFor, validateGuideFrontmatter } from '../../src/lib/content-rules';
+import { invalidSkillVerdicts, requiredFieldsFor, validateGuideFrontmatter } from '../../src/lib/content-rules';
 
 const complete: Record<string, unknown> = {
 	title: 'Página',
@@ -100,5 +100,16 @@ describe('contenido: longitud de description', () => {
 
 	test('Scenario: Description libre fuera de guías', () => {
 		expect(validateGuideFrontmatter('recursos', { title: 'Recursos', description: ofLength(20) })).toEqual([]);
+	});
+});
+
+describe('contenido: skills complementarias', () => {
+	test('Scenario: Valor de veredicto no permitido', () => {
+		const issues = invalidSkillVerdicts([
+			{ skill: 'tdd', verdict: 'Adoptar' },
+			{ skill: 'to-spec', verdict: 'Quizá' },
+		]);
+		expect(issues).toHaveLength(1);
+		expect(issues[0]).toMatch(/to-spec.*Quizá/);
 	});
 });

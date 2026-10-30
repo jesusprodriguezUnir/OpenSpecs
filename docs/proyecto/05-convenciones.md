@@ -43,3 +43,8 @@
 - [ ] `npm run check`, `npm run test`, `openspec validate --all --strict` en verde.
 - [ ] Preview de Vercel revisado en móvil (360 px) y escritorio.
 - [ ] Change archivado en la PR.
+
+## Base de conocimiento (`docs/openspec-kb/`)
+
+- La web (y su PDF) es la **edición canónica**; la KB es material de trabajo para NotebookLM y nunca se publica directamente.
+- Si cambia la KB del proyecto de claude.ai, se abre un change `chore-sync-kb-<fecha>` que copia los ficheros a `docs/openspec-kb/` y lleva a las MDX lo que proceda, adaptado a las reglas editoriales (dominio neutro, sin «fichero NN», sin stack del autor).

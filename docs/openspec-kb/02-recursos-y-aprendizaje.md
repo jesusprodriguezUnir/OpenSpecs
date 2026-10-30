@@ -35,6 +35,11 @@ Otros recursos del repositorio:
 - **Deep dive de arquitectura** — https://redreamality.com/garden/notes/openspec-guide/
 - **openspec-mcp** (servidor MCP de la comunidad con dashboard y aprobaciones) — https://github.com/Lumiaqian/openspec-mcp
 
+## Recursos complementarios (ver ficheros 11 y 12)
+
+- **Skills de Matt Pocock** — https://github.com/mattpocock/skills — colección MIT de *agent skills* (grill-with-docs, tdd, diagnosing-bugs, code-review, retro…). No compite con OpenSpec: se enchufa antes (alineamiento) y durante (TDD, revisión). Análisis y selección recomendada en `11-skills-mattpocock.md`.
+- **Roberto Canales — «Desarrollo de Software Basado en Especificaciones»** — https://robertocanales.com/proyectos/libro-sdd — documento técnico en español (45 pp., PDF) que compara Spec Kit, Kiro, OpenSpec y Tessl por mecanismos y propone un modelo de gobierno del cambio ("verja", espectro de autoridad, cierre calculado). Resumen e implicaciones en `12-roberto-canales-libro-sdd.md`.
+
 ## Vídeos (YouTube)
 
 - Getting Started with OpenSpec — Setup Tutorial: https://www.youtube.com/watch?v=raPTOBUpc3M
@@ -50,8 +55,8 @@ Otros recursos del repositorio:
 
 | Día | Actividad | Resultado |
 |---|---|---|
-| 1 | Leer `getting-started.md` y `overview.md`; ver un vídeo de setup | Modelo mental claro |
+| 1 | Leer `getting-started.md` y `overview.md`; ver un vídeo de setup; leer partes I y II del documento de Roberto Canales | Modelo mental claro y criterio comparativo |
 | 2 | Instalar y ejecutar `openspec init` en un repo de pruebas; ejecutar `/opsx:onboard` | Primer ciclo completo guiado |
 | 3 | Leer `existing-projects.md` y `examples.md` | Saber aplicar las recetas |
-| 4 | Escribir `config.yaml` real para un proyecto del equipo | Contexto de calidad para la IA |
-| 5 | Primer cambio real y pequeño (bugfix o endpoint) sobre un proyecto existente | Experiencia práctica y feedback |
+| 4 | Escribir `config.yaml` real para un proyecto del equipo; probar `/grill-with-docs` sobre un ticket real | Contexto de calidad para la IA y glosario de dominio |
+| 5 | Primer cambio real y pequeño (bugfix o endpoint) sobre un proyecto existente, con la skill `tdd` | Experiencia práctica y feedback |

@@ -1,8 +1,8 @@
 ---
 title: "Glosario"
-description: "Glosario de OpenSpec y del desarrollo guiado por specs: spec, change, delta spec, archive, schema, perfil, store, MCP y más, cada uno con ancla estable."
+description: "Glosario de OpenSpec y del desarrollo guiado por specs: spec, change, delta spec, archive, spec-anchored, verja, MCP y más, cada uno con ancla estable."
 openspecVersion: "1.14.0"
-lastReviewed: 2026-10-04
+lastReviewed: 2026-10-30
 sidebar:
   order: 4
 ---
@@ -62,6 +62,32 @@ Conjunto de workflows que `openspec init` genera como comandos de chat: el perfi
 ### Store
 
 Repositorio OpenSpec independiente registrado en la máquina, útil para compartir specs entre varios repositorios.
+
+## Gobierno del cambio
+
+### Spec-first
+
+La spec se escribe antes de implementar, pero después manda el código y la spec envejece. Ver [Gobierno del cambio](/equipo/gobierno/).
+
+### Spec-anchored
+
+La spec ratificada sigue siendo normativa tras implementar; la deriva se controla con revisión y tests. Es la posición de OpenSpec, que trabaja por changes.
+
+### Spec-as-source
+
+La salida generada no se edita: se cambia la spec y se regenera el código. Exige regeneración repetible y detectar ediciones manuales.
+
+### Verja
+
+Comprobación ejecutable más política obligatoria más bloqueo efectivo; por ejemplo, la validación de specs, el build y los tests registrados como requisito para fusionar en `main`. Un hook local no es una verja.
+
+### Trinquete
+
+Regla que permite avanzar sin dejar que la calidad retroceda; por ejemplo, que la cobertura de escenarios de un dominio no baje entre changes.
+
+### Cierre calculado
+
+Un change se da por cerrado cuando el sistema lo deduce de artefactos y resultados (matriz de cobertura completa, CI en verde sobre el mismo commit, aprobaciones presentes), no porque el agente lo declare.
 
 ## Entorno y equipo
 

@@ -1,7 +1,7 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import { getCollection, render } from 'astro:content';
-import { MANUAL_AUTHOR, MANUAL_READING_ROUTE } from '../config/manual.mjs';
+import { MANUAL_AUTHOR, MANUAL_ONLINE_URL, MANUAL_READING_ROUTE, MANUAL_SOURCES } from '../config/manual.mjs';
 import { MANUAL_GROUPS, editionDate, manualAnchor, orderManualEntries, referenceVersion } from '../lib/manual-order';
 import InfografiaSdd from '../components/InfografiaSdd.astro';
 
@@ -41,6 +41,10 @@ const parts = MANUAL_GROUPS.map((g) => ({
 	items: sections.filter((s) => s.group === g.label),
 })).filter((p) => p.items.length > 0);
 const FLOW = ['explore', 'propose', 'revisión', 'apply', 'verify', 'archive'];
+
+// Colophon (w17): edition sheet with the same values as the cover, online edition and sources.
+const COLOPHON_ID = 'colofon';
+const siteUrl = MANUAL_ONLINE_URL;
 ---
 
 <StarlightPage
@@ -177,6 +181,15 @@ const FLOW = ['explore', 'propose', 'revisión', 'apply', 'verify', 'archive'];
 					</div>
 				))
 			}
+			<ol class="toc-end">
+				<li data-manual-toc-colophon>
+					<span class="num" aria-hidden="true"></span>
+					<span class="entry">
+						<a href={`#${COLOPHON_ID}`}>Colofón</a>
+						<span class="desc">Ficha de la edición y fuentes</span>
+					</span>
+				</li>
+			</ol>
 		</nav>
 
 		{
@@ -194,6 +207,45 @@ const FLOW = ['explore', 'propose', 'revisión', 'apply', 'verify', 'archive'];
 				</section>
 			))
 		}
+
+		<section class="colophon" id={COLOPHON_ID} data-manual-colophon aria-labelledby={`${COLOPHON_ID}-titulo`}>
+			<h2 class="section-title" id={`${COLOPHON_ID}-titulo`}>Colofón</h2>
+			<hr class="rule" />
+			<dl class="colophon-sheet">
+				<dt>Título</dt>
+				<dd>OpenSpec desde cero · Manual práctico</dd>
+				<dt>Autor</dt>
+				<dd>{MANUAL_AUTHOR}</dd>
+				<dt>Versión de referencia</dt>
+				<dd data-colophon-version>OpenSpec v{version}</dd>
+				{editionLabel && (
+					<>
+						<dt>Revisión</dt>
+						<dd data-colophon-edition>{editionLabel}</dd>
+					</>
+				)}
+				<dt>Edición en línea</dt>
+				<dd><a href={siteUrl} data-colophon-site>{siteUrl}</a></dd>
+			</dl>
+			<p>
+				Este documento se genera automáticamente a partir del mismo contenido que la web, que es siempre la edición
+				más reciente. Si encuentras una diferencia entre ambos, manda la web.
+			</p>
+			<h3>Fuentes principales</h3>
+			<ul class="colophon-sources">
+				{
+					MANUAL_SOURCES.map((source) => (
+						<li>
+							<a href={source.url}>{source.title}</a>
+							<span class="desc"> — {source.note}</span>
+						</li>
+					))
+				}
+			</ul>
+			<p class="colophon-more">
+				El catálogo completo de documentación, artículos y vídeos está en <a href={new URL('recursos/', siteUrl).href}>Recursos</a>.
+			</p>
+		</section>
 	</div>
 </StarlightPage>
 
@@ -350,7 +402,8 @@ const FLOW = ['explore', 'propose', 'revisión', 'apply', 'verify', 'archive'];
 	.infografia-page,
 	.manual-section,
 	.howto,
-	.toc {
+	.toc,
+	.colophon {
 		margin-top: 3rem;
 		padding-top: 2rem;
 	}
@@ -405,9 +458,52 @@ const FLOW = ['explore', 'propose', 'revisión', 'apply', 'verify', 'archive'];
 		color: var(--m-ink);
 		text-decoration: none;
 	}
-	.toc .desc {
+	.toc .desc,
+	.colophon .desc {
 		font-size: 0.82rem;
 		color: var(--m-muted);
+	}
+	.toc-end {
+		margin-top: 1.5rem !important;
+	}
+
+	/* Colophon */
+	.colophon-sheet {
+		display: grid;
+		grid-template-columns: max-content 1fr;
+		gap: 0.4rem 1.5rem;
+		margin: 0 0 1.5rem;
+		padding: 1rem 1.25rem;
+		border-left: 4px solid var(--m-teal);
+		background: color-mix(in srgb, var(--m-teal) 6%, transparent);
+	}
+	.colophon-sheet dt,
+	.colophon-sheet dd {
+		margin: 0 !important;
+		padding: 0;
+		line-height: 1.5;
+	}
+	.colophon-sheet dt {
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--m-muted);
+		align-self: center;
+	}
+	.colophon-sheet dd {
+		margin: 0;
+		color: var(--m-ink);
+	}
+	.colophon-sources {
+		padding-left: 1.1rem;
+	}
+	.colophon-sources li {
+		margin: 0.35rem 0;
+	}
+	.colophon-sources a,
+	.colophon-sheet a {
+		overflow-wrap: anywhere;
 	}
 
 	/* Tables: teal header row */
@@ -569,8 +665,15 @@ const FLOW = ['explore', 'propose', 'revisión', 'apply', 'verify', 'archive'];
 		}
 		.howto,
 		.toc,
-		.manual-section {
+		.manual-section,
+		.colophon {
 			padding-inline: 16mm !important;
+		}
+		.colophon {
+			break-before: page;
+			break-inside: avoid;
+			margin-top: 0;
+			padding-top: 0;
 		}
 		.cover {
 			box-sizing: border-box;

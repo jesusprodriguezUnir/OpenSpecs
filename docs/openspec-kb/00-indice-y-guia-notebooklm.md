@@ -1,7 +1,9 @@
 # OpenSpec en nuestros proyectos — Índice y guía de uso en NotebookLM
 
 > Base de conocimiento para adoptar OpenSpec (spec-driven development) en proyectos .NET Core + Angular, trabajando con Claude Code e integrando Jira / Azure DevOps.
-> Última revisión: 28/09/2026 · Versión de referencia: OpenSpec v1.13.0
+> Última revisión: 30/10/2026 · Versión de referencia: OpenSpec v1.13.0
+
+> **Edición canónica:** la versión pública y actualizada de este contenido es la web https://openspec-ochre.vercel.app y su manual en PDF (https://openspec-ochre.vercel.app/manual-openspec.pdf), escritos para OpenSpec 1.14. Estos ficheros son material de trabajo para NotebookLM y contexto del equipo; si algo difiere, manda la web.
 
 ## Contenido del cuaderno
 
@@ -18,15 +20,20 @@
 | 08 | `08-plantillas.md` | Plantillas listas para copiar (CLAUDE.md, config.yaml, comandos, pipeline, PR) |
 | 09 | `09-plan-de-adopcion-y-riesgos.md` | Plan por sprints, Definition of Done, métricas y riesgos |
 | 10 | `10-faq.md` | Preguntas frecuentes |
+| 11 | `11-skills-mattpocock.md` | Skills de Matt Pocock (grill, tdd, code-review…): cuáles adoptar junto a OpenSpec y cuáles no |
+| 12 | `12-roberto-canales-libro-sdd.md` | Libro SDD de Roberto Canales: espectro de autoridad, "verja", crítica a OpenSpec e implicaciones |
 
 ## Cómo montar el cuaderno en NotebookLM
 
 1. Entra en https://notebooklm.google.com y crea un cuaderno nuevo llamado **"OpenSpec — Adopción en proyectos"**.
-2. Pulsa **Añadir fuentes → Subir** y selecciona los 11 ficheros `.md` (NotebookLM admite Markdown como fuente).
+2. Pulsa **Añadir fuentes → Subir** y selecciona los 13 ficheros `.md` (NotebookLM admite Markdown como fuente).
 3. Añade también como fuentes web (opcional, pero recomendable):
+   - https://openspec-ochre.vercel.app/manual-openspec.pdf (manual completo de la web, edición canónica)
    - https://github.com/Fission-AI/OpenSpec (README del repositorio)
    - https://openspec.dev
    - https://intent-driven.dev/knowledge/openspec/
+   - https://github.com/mattpocock/skills (README con el catálogo de skills)
+   - El PDF de 45 páginas del libro de Roberto Canales (descargable desde https://robertocanales.com/proyectos/libro-sdd; súbelo como fichero: la web se renderiza con JavaScript y NotebookLM puede no leerla bien)
    - Los vídeos de YouTube listados en `02-recursos-y-aprendizaje.md` (NotebookLM admite enlaces de YouTube con transcripción)
 4. Revisa que todas las fuentes estén marcadas como activas.
 
@@ -44,6 +51,8 @@ Configura el cuaderno (icono de ajustes del chat → estilo personalizado) con a
 - "Hazme un checklist para la revisión de una PR que incluye un cambio OpenSpec."
 - "¿Qué riesgos tiene conectar el MCP de Azure DevOps a Claude Code?"
 - "Resume el plan de adopción en 5 puntos para presentarlo a dirección."
+- "¿Qué skills de Matt Pocock complementan a OpenSpec y en qué fase?"
+- "Según Roberto Canales, ¿qué deja fuera OpenSpec y cómo lo cubrimos?"
 
 ## Resúmenes de audio y vídeo
 
@@ -56,7 +65,10 @@ Configura el cuaderno (icono de ajustes del chat → estilo personalizado) con a
 - **SDD (Spec-Driven Development):** desarrollo en el que una especificación estructurada guía la implementación del agente de IA.
 - **Spec:** documento en `openspec/specs/<dominio>/` que describe el comportamiento actual del sistema (la fuente de verdad).
 - **Change:** carpeta en `openspec/changes/<id>/` con una propuesta de cambio (proposal, delta specs, design, tasks).
-- **Delta spec:** fragmento de spec que marca requisitos como ADDED, MODIFIED o REMOVED.
+- **Delta spec:** fragmento de spec que marca requisitos como ADDED, MODIFIED, REMOVED (o RENAMED).
 - **Archive:** operación que fusiona las delta specs en `openspec/specs/` y mueve el change a `changes/archive/`.
 - **MCP (Model Context Protocol):** protocolo para que el agente de IA acceda a herramientas externas (Jira, Azure DevOps…).
 - **Brownfield:** proyecto existente (frente a greenfield, proyecto desde cero).
+- **Skill:** carpeta con un `SKILL.md` que empaqueta un procedimiento reutilizable para el agente (p. ej., `tdd`).
+- **Spec-anchored:** la spec ratificada sigue siendo normativa tras implementar; es nuestra posición con OpenSpec (fichero 12).
+- **Verja:** comprobación ejecutable + política obligatoria + bloqueo efectivo (p. ej., Build Validation en `main`).

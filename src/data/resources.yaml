@@ -127,6 +127,16 @@
   url: https://www.rushis.com/mapping-openspec-to-jira-sdd-without-abandoning-your-backlog/
   type: comunidad
   lang: en
+- id: mattpocock-skills
+  title: Skills de Matt Pocock (grill-with-docs, tdd, diagnosing-bugs, code-review, retro…)
+  url: https://github.com/mattpocock/skills
+  type: comunidad
+  lang: en
+- id: roberto-canales-libro-sdd
+  title: Roberto Canales — Desarrollo de Software Basado en Especificaciones
+  url: https://robertocanales.com/proyectos/libro-sdd
+  type: comunidad
+  lang: es
 - id: deep-dive-arquitectura
   title: Deep dive de arquitectura de OpenSpec
   url: https://redreamality.com/garden/notes/openspec-guide/
