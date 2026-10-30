@@ -34,10 +34,10 @@ La infografía se dibuja siempre como una tarjeta clara (fondo blanco, tinta osc
 - Todos los pares texto/fondo cumplen un contraste ≥ 4,5:1 (texto pequeño). Los colores saturados se usan solo en iconos, bordes y números, nunca como fondo de texto pequeño.
 
 ### D4. Maquetación
-- Escritorio (≥ 72rem): rejilla 2×2 que imita la composición de la referencia. Bloque 1 arriba a la izquierda y bloque 3 (fila de comandos `/opsx`) arriba a la derecha. Abajo, el bloque 2 (ciclo de cuatro artefactos en una rejilla 2×2 alrededor de la etiqueta central «Change») y el bloque 4.
-- Tablet (≥ 50rem): dos columnas.
-- Móvil: una columna, en el orden 1→4 del DOM. Las flechas del ciclo se ocultan y los artefactos pasan a una lista.
-- El orden del DOM es siempre 1→4; la rejilla no reordena visualmente (sin `order` CSS), así que el orden de lectura coincide con el visual.
+- Con el contenedor de al menos 40rem (`@container`, un único punto de corte), rejilla 2×2 rellenada por columnas (`grid-auto-flow: column`) que imita la composición de la referencia: bloque 1 arriba a la izquierda, bloque 3 (fila de comandos `/opsx`) arriba a la derecha, y abajo el bloque 2 (ciclo de cuatro artefactos alrededor de la etiqueta central «Change») y el bloque 4.
+- Por debajo de 40rem: una columna, en el orden 1→4 del DOM. Las flechas del ciclo se ocultan y los artefactos pasan a una lista.
+- El orden del DOM es siempre 1→4 y no hay `order` CSS, así que el orden de lectura de las tecnologías de apoyo es 1→4. En la rejilla ancha el orden visual por filas es 1,3 / 2,4, y dentro del ciclo el artefacto 4 queda abajo a la izquierda (`grid-area`). Se acepta porque el flujo visual es circular y cada bloque lleva su número.
+- Nota de cierre: la landing añade el encabezado `## El método de un vistazo` delante de la infografía (no estaba previsto en D5).
 
 ### D5. Integración en la landing
 Se inserta `<InfografiaSdd />` en `index.mdx` entre «Qué es OpenSpec en 3 frases» y «El ciclo de trabajo», con la clase `not-content` para evitar los estilos de prosa de Starlight. Queda por debajo del hero, así que no afecta al LCP. Las dimensiones de los iconos se fijan con `width`/`height` para no generar CLS.
