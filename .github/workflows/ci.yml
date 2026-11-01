@@ -101,5 +101,5 @@ jobs:
           path: dist
       - uses: lycheeverse/lychee-action@v2
         with:
-          args: --offline --include-fragments --no-progress --root-dir ${{ github.workspace }}/dist dist/
+          args: --offline --include-fragments --index-files index.html --no-progress --root-dir ${{ github.workspace }}/dist dist/
           fail: true
