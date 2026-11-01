@@ -13,7 +13,8 @@ if (!existsSync(dir)) {
 
 const result = spawnSync(
 	'lychee',
-	['--offline', '--include-fragments', '--no-progress', '--root-dir', dir, dir],
+	// --index-files: resolve directory links (/page/#anchor) to index.html so fragments are checked there.
+	['--offline', '--include-fragments', '--index-files', 'index.html', '--no-progress', '--root-dir', dir, dir],
 	{ stdio: 'inherit' },
 );
 
