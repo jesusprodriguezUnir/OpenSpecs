@@ -40,8 +40,8 @@
 
 ## 7. Cierre
 
-- [ ] 7.1 Ejecutar `npm run links` sin enlaces rotos (pendiente: `lychee` no está instalado en el entorno de apply; se ejecuta en local o en CI)
+- [x] 7.1 Ejecutar `npm run links` sin enlaces rotos (verificado en CI, PR #24, tras añadir `--index-files index.html` a lychee)
 - [x] 7.2 Tarea final obligatoria: `npm run build`, `npx astro check`, `npm run test` y `openspec validate --all --strict --no-interactive` en verde
-- [ ] 7.3 Pasar el subagente `spec-verifier`: ningún Scenario sin test
+- [x] 7.3 Pasar el subagente `spec-verifier`: ningún Scenario sin test
 
 > Nota de apply (30/10/2026): comprobación manual previa al verificador, los 24 escenarios del delta tienen un test con `Scenario: <nombre>`; build, `astro check`, 82 unitarios, 157 E2E y `openspec validate --all --strict` en verde. El colofón usa `MANUAL_ONLINE_URL` fija para que la huella del PDF no dependa de `SITE_URL`.
