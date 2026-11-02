@@ -1,25 +1,61 @@
+import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { join } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
+import { chatReference, undocumentedCommands } from './opsx-commands';
 import { executableScripts, scriptExtras, type ScriptRef } from './script-budget';
 
 const HERO = '.hero';
 const PRIMARY = '/empieza/primer-cambio/';
 const SECONDARY = '/empieza/que-es/';
+const PDF = '/manual-openspec.pdf';
 const JOURNEYS = [
-	{ name: 'Equipo', href: '/equipo/adopcion/' },
 	{ name: 'Inicio', href: '/empieza/que-es/' },
+	{ name: 'Equipo', href: '/equipo/adopcion/' },
 	{ name: 'Consulta', href: '/referencia/cli/' },
 ];
-const STEPS = ['explore', 'propose', 'apply', 'archive'];
+const STEPS = ['explore', 'propose', 'Revisión', 'apply', 'verify', 'archive'];
+const DOCS_DIR = join(process.cwd(), 'src', 'content', 'docs');
 
-const journeyCard = (page: Page, name: string) =>
-	page.locator('main .recorrido').filter({ has: page.locator('.name', { hasText: new RegExp(`^${name}`) }) });
-
-const cycleItems = (page: Page) => page.locator('main ol[aria-label]').locator('li');
+const journeyCard = (page: Page, name: string) => page.locator(`main .recorrido[data-recorrido="${name}"]`);
+const cycleItems = (page: Page) => page.locator('main ol.ciclo[aria-label] > li');
+const figure = (page: Page) => page.locator(`${HERO} figure[data-delta-figura]`);
+const sectionByHeading = (page: Page, heading: string) =>
+	page.locator('main section').filter({ has: page.locator('h2', { hasText: heading }) });
 
 const scriptsOf = (page: Page): Promise<ScriptRef[]> =>
 	page.$$eval('script', (nodes) =>
 		nodes.map((n) => ({ src: n.getAttribute('src'), content: n.textContent ?? '', type: n.getAttribute('type') })),
 	).then(executableScripts);
+
+/** Same «X,X MB» label the build writes next to the PDF link (es-ES, one decimal). */
+const pdfSizeLabel = (bytes: number) =>
+	`${new Intl.NumberFormat('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(bytes / (1024 * 1024))} MB`;
+
+/** Highest `openspecVersion` declared in the docs frontmatter, read from the source files. */
+function highestDeclaredVersion(): string {
+	const files: string[] = [];
+	const walk = (dir: string) => {
+		for (const name of readdirSync(dir)) {
+			const path = join(dir, name);
+			if (statSync(path).isDirectory()) walk(path);
+			else if (/\.mdx?$/.test(name)) files.push(path);
+		}
+	};
+	walk(DOCS_DIR);
+	const versions = files
+		.map((f) => readFileSync(f, 'utf8').match(/^openspecVersion:\s*["']?(\d+\.\d+(?:\.\d+)?)/m)?.[1])
+		.filter((v): v is string => Boolean(v));
+	const parse = (v: string) => v.split('.').map(Number);
+	versions.sort((a, b) => {
+		const [pa, pb] = [parse(a), parse(b)];
+		for (let i = 0; i < 3; i++) {
+			const d = (pa[i] ?? 0) - (pb[i] ?? 0);
+			if (d) return d;
+		}
+		return 0;
+	});
+	return versions.at(-1) ?? '';
+}
 
 test.describe('landing', () => {
 	test.beforeEach(async ({ page }) => {
@@ -46,44 +82,30 @@ test.describe('landing', () => {
 		}
 	});
 
-	test('Scenario: Tres frases bajo el encabezado', async ({ page }) => {
-		const heading = page.locator('main h2', { hasText: 'OpenSpec' }).first();
-		await expect(heading).toBeVisible();
-		const items = await heading.evaluate((h) => {
-			const anchor: Element = h.parentElement?.classList.contains('sl-heading-wrapper') ? h.parentElement : h;
-			const next = anchor.nextElementSibling;
-			if (next?.tagName !== 'OL') return [];
-			return [...next.querySelectorAll(':scope > li')].map((li) => li.textContent ?? '');
-		});
-		expect(items).toHaveLength(3);
-		for (const item of items) {
-			expect(item.trim().split(/(?<=[.?!])\s+/).filter(Boolean)).toHaveLength(1);
-		}
+	test('Scenario: Enlace al manual PDF con su tamaño real', async ({ page, request }) => {
+		const link = page.locator(`${HERO} a[href="${PDF}"]`);
+		await expect(link).toHaveCount(1);
+		const response = await request.get(PDF);
+		expect(response.status()).toBe(200);
+		const label = pdfSizeLabel((await response.body()).length);
+		expect(label).toMatch(/^\d+,\d MB$/);
+		await expect(link).toContainText(label);
 	});
 
-	test('Scenario: Cuatro pasos en orden', async ({ page }) => {
-		const list = page.locator('main ol[aria-label]');
-		await expect(list).toHaveCount(1);
-		await expect(list).toHaveAccessibleName(/\S/);
-		const items = cycleItems(page);
-		await expect(items).toHaveCount(4);
-		const texts = await items.allTextContents();
-		STEPS.forEach((step, i) => expect(texts[i]).toContain(step));
-	});
-
-	test('Scenario: Cada paso tiene descripción', async ({ page }) => {
-		const items = cycleItems(page);
-		for (let i = 0; i < STEPS.length; i++) {
-			const desc = (await items.nth(i).locator('.desc').textContent())?.trim() ?? '';
-			expect(desc, STEPS[i]).not.toBe('');
-		}
+	test('Scenario: Versión de OpenSpec de referencia en el hero', async ({ page }) => {
+		const version = highestDeclaredVersion();
+		expect(version).not.toBe('');
+		await expect(page.locator(`${HERO} [data-reference-version]`)).toHaveText(`OpenSpec ${version}`);
 	});
 
 	test('Scenario: Recorridos con su destino', async ({ page }) => {
-		const hrefs = await page.locator('main .recorrido').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
-		expect(hrefs).toEqual(JOURNEYS.map((j) => j.href));
-		for (const { name, href } of JOURNEYS) {
-			await expect(journeyCard(page, name), name).toHaveAttribute('href', href);
+		await expect(page.locator('main h2', { hasText: '¿Desde dónde partes?' })).toHaveCount(1);
+		const cards = await page
+			.locator('main .recorrido')
+			.evaluateAll((as) => as.map((a) => ({ name: a.getAttribute('data-recorrido'), href: a.getAttribute('href') })));
+		expect(cards).toEqual(JOURNEYS);
+		for (const { name } of JOURNEYS) {
+			await expect(journeyCard(page, name).locator('.name')).toHaveText(name);
 		}
 	});
 
@@ -95,64 +117,149 @@ test.describe('landing', () => {
 		await expect(journeyCard(page, 'Consulta')).toContainText(/búsqueda|buscador/i);
 	});
 
-	test('Scenario: Terminal oculta a tecnologías de apoyo', async ({ page }) => {
-		const terminal = page.locator(`${HERO} [aria-hidden="true"]`).filter({ hasText: 'openspec init' });
-		await expect(terminal).toHaveCount(1);
-		await expect(terminal).toContainText('/opsx:archive');
+	test('Scenario: Número de páginas coherente con el sidebar', async ({ page }) => {
+		const cards = await page.locator('main .recorrido').evaluateAll((as) =>
+			as.map((a) => ({
+				href: a.getAttribute('href') ?? '',
+				pages: Number(a.querySelector('[data-section-pages]')?.getAttribute('data-section-pages')),
+				text: a.querySelector('[data-section-pages]')?.textContent ?? '',
+			})),
+		);
+		expect(cards).toHaveLength(JOURNEYS.length);
+		for (const card of cards) {
+			expect(card.text, card.href).toContain(`${card.pages} página`);
+			await page.goto(card.href);
+			const links = await page
+				.locator('#starlight__sidebar a[aria-current="page"]')
+				.evaluate((a) => a.closest('ul.top-level > li')?.querySelectorAll('a[href]').length ?? 0);
+			expect(card.pages, card.href).toBe(links);
+		}
 	});
 
-	test('Scenario: Terminal visible con JavaScript desactivado', async ({ browser, baseURL }) => {
-		const context = await browser.newContext({ javaScriptEnabled: false, baseURL });
-		const page = await context.newPage();
-		await page.goto('/');
-		const terminal = page.locator(`${HERO} [aria-hidden="true"]`).filter({ hasText: 'openspec init' });
-		await expect(terminal).toBeVisible();
-		await expect(terminal).toContainText('/opsx:apply');
-		await context.close();
+	test('Scenario: Seis pasos en orden', async ({ page }) => {
+		await expect(page.locator('main h2', { hasText: 'El ciclo de un change' })).toHaveCount(1);
+		const list = page.locator('main ol.ciclo[aria-label]');
+		await expect(list).toHaveCount(1);
+		await expect(list).toHaveAccessibleName(/\S/);
+		const items = cycleItems(page);
+		await expect(items).toHaveCount(STEPS.length);
+		const texts = await items.allTextContents();
+		STEPS.forEach((step, i) => expect(texts[i]).toContain(step));
+	});
+
+	test('Scenario: Cada paso tiene descripción', async ({ page }) => {
+		const items = cycleItems(page);
+		await expect(items).toHaveCount(STEPS.length);
+		for (let i = 0; i < STEPS.length; i++) {
+			const desc = (await items.nth(i).locator('.desc').textContent())?.trim() ?? '';
+			expect(desc, STEPS[i]).not.toBe('');
+		}
+	});
+
+	test('Scenario: Paso opcional y paso del perfil ampliado marcados', async ({ page }) => {
+		const step = (cmd: string) => cycleItems(page).filter({ has: page.locator('code', { hasText: cmd }) });
+		await expect(step('/opsx:explore')).toContainText('opcional');
+		await expect(step('/opsx:verify')).toContainText('perfil ampliado');
+	});
+
+	test('Scenario: Comandos /opsx de la home documentados', async ({ page }) => {
+		const text = (await page.locator('body').textContent()) ?? '';
+		expect(text).toMatch(/\/opsx:/);
+		expect(undocumentedCommands(text, await chatReference(page))).toEqual([]);
+	});
+
+	test('Scenario: Comando inexistente en la home detectado', async ({ page }) => {
+		const home = (await page.locator('body').textContent()) ?? '';
+		const reference = await chatReference(page);
+		expect(reference.workflows).toContain('verify');
+		expect(undocumentedCommands(`${home} /opsx:deploy`, reference)).toEqual(['deploy']);
+	});
+
+	test('Scenario: Figura con nombre accesible y texto de spec', async ({ page }) => {
+		const fig = figure(page);
+		await expect(fig).toHaveCount(1);
+		await expect(fig).toHaveAccessibleName(/\S/);
+		await expect(fig.locator('img')).toHaveCount(0);
+		for (const fragment of ['ADDED Requirements', 'Requirement:', 'Scenario:', 'WHEN', 'THEN']) {
+			await expect(fig).toContainText(fragment);
+		}
+	});
+
+	test('Scenario: Pestañas decorativas no interactivas', async ({ page }) => {
+		const fig = figure(page);
+		const tabs = fig.locator('[aria-hidden="true"]').filter({ hasText: 'proposal.md' });
+		await expect(tabs).toHaveCount(1);
+		await expect(tabs).toContainText('tasks.md');
+		await expect(fig.locator('[role="tab"], [role="tablist"], button')).toHaveCount(0);
+	});
+
+	test('Scenario: Recuento de escenarios coherente', async ({ page }) => {
+		const fig = figure(page);
+		const shown = Number((await fig.locator('[data-scenario-count]').textContent())?.trim());
+		const lines = await fig.locator('pre .linea').allTextContents();
+		const scenarios = lines.filter((l) => /^\s*[+\-]?\s*#### Scenario:/.test(l)).length;
+		expect(scenarios).toBeGreaterThan(0);
+		expect(shown).toBe(scenarios);
+	});
+
+	test('Scenario: Carpetas y etiquetas presentes', async ({ page }) => {
+		const section = sectionByHeading(page, 'Dos carpetas, un modelo mental');
+		await expect(section).toHaveCount(1);
+		for (const fragment of ['openspec/changes/', 'openspec/changes/archive/', 'openspec/specs/', 'ADDED', 'MODIFIED', 'REMOVED', 'RENAMED']) {
+			await expect(section).toContainText(fragment);
+		}
+	});
+
+	test('Scenario: Enlace a conceptos', async ({ page, request }) => {
+		const link = sectionByHeading(page, 'Dos carpetas, un modelo mental').locator('a[href="/empieza/conceptos/"]');
+		await expect(link).toHaveCount(1);
+		expect((await request.get('/empieza/conceptos/')).status()).toBe(200);
+	});
+
+	test('Scenario: Enlaces de En equipo', async ({ page, request }) => {
+		const section = sectionByHeading(page, 'En equipo');
+		await expect(section).toHaveCount(1);
+		const hrefs = await section.locator('a').evaluateAll((as) => as.map((a) => a.getAttribute('href') ?? ''));
+		for (const href of ['/equipo/jira/', '/equipo/azure-devops/', '/equipo/ci/', '/equipo/gobierno/', '/equipo/adopcion/']) {
+			expect(hrefs).toContain(href);
+			expect((await request.get(href)).status(), href).toBe(200);
+		}
+	});
+
+	test('Scenario: Enlaces de Para llevártelo', async ({ page, request }) => {
+		const section = sectionByHeading(page, 'Para llevártelo');
+		await expect(section).toHaveCount(1);
+		const hrefs = await section.locator('a').evaluateAll((as) => as.map((a) => a.getAttribute('href') ?? ''));
+		for (const href of [PDF, '/recursos/', '/como-se-hizo/']) {
+			expect(hrefs).toContain(href);
+			expect((await request.get(href)).status(), href).toBe(200);
+		}
 	});
 
 	test('Scenario: Sin animaciones con prefers-reduced-motion', async ({ page }) => {
 		await page.emulateMedia({ reducedMotion: 'reduce' });
 		await page.goto('/');
-		const running = await page.evaluate(
-			() =>
-				document
-					.getAnimations()
-					.filter((a) => (a.effect as KeyframeEffect).target?.closest('.terminal, .ciclo-pasos')).length,
-		);
-		expect(running).toBe(0);
-		const lines = page.locator(`${HERO} .terminal .line`);
-		await expect(lines).toHaveCount(8);
-		for (let i = 0; i < 8; i++) {
-			await expect(lines.nth(i)).toHaveCSS('opacity', '1');
+		await page.locator('main .recorrido').first().hover();
+		expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
+	});
+
+	test('Scenario: Home sin desbordamiento horizontal a 360 px', async ({ page }) => {
+		await page.setViewportSize({ width: 360, height: 800 });
+		await page.goto('/');
+		await expect(figure(page)).toBeVisible();
+		const { scroll, viewport } = await page.evaluate(() => ({
+			scroll: document.documentElement.scrollWidth,
+			viewport: document.documentElement.clientWidth,
+		}));
+		expect(scroll).toBeLessThanOrEqual(viewport);
+	});
+
+	test('Scenario: Iconos de la home ocultos a tecnologías de apoyo', async ({ page }) => {
+		const icons = page.locator('main svg');
+		expect(await icons.count()).toBeGreaterThan(0);
+		for (const icon of await icons.all()) {
+			await expect(icon).toHaveAttribute('aria-hidden', 'true');
 		}
-	});
-
-	test('Scenario: Ninguna animación infinita en la landing', async ({ page }) => {
-		await page.emulateMedia({ reducedMotion: 'no-preference' });
-		await page.goto('/');
-		const iterations = await page.evaluate(() =>
-			document
-				.getAnimations()
-				.filter((a) => (a.effect as KeyframeEffect).target?.closest('.terminal, .ciclo-pasos'))
-				.map((a) => a.effect!.getComputedTiming().iterations),
-		);
-		expect(iterations.length).toBeGreaterThan(0);
-		expect(iterations).not.toContain(Infinity);
-	});
-
-	test('Scenario: Cursor visible al terminar', async ({ page }) => {
-		await page.emulateMedia({ reducedMotion: 'no-preference' });
-		await page.goto('/');
-		await page.evaluate(() =>
-			Promise.all(
-				document
-					.getAnimations()
-					.filter((a) => (a.effect as KeyframeEffect).target?.closest('.terminal'))
-					.map((a) => a.finished),
-			),
-		);
-		await expect(page.locator(`${HERO} .terminal .cursor`)).toHaveCSS('opacity', '1');
 	});
 
 	test('Scenario: Fuentes servidas desde el propio sitio', async ({ page, baseURL }) => {
@@ -184,124 +291,5 @@ test.describe('landing', () => {
 		await page.goto('/empieza/que-es/');
 		const guide = await scriptsOf(page);
 		expect(scriptExtras(landing, guide)).toEqual([]);
-	});
-});
-
-const INFOGRAPHIC = 'OpenSpec: desarrollo guiado por especificaciones con IA';
-const BLOCKS = ['Fundamentos', 'Los cuatro artefactos de un change', 'El ciclo diario con /opsx', 'En equipo'];
-const CHAT_REFERENCE = '/referencia/comandos-chat/';
-
-const infographic = (page: Page) => page.getByRole('figure', { name: INFOGRAPHIC });
-
-type ChatReference = { commands: string[]; workflows: string[] };
-
-/** Names of the `/opsx:<name>` commands in `text` that the chat reference documents neither as a command nor as a workflow. */
-function undocumentedCommands(text: string, reference: ChatReference): string[] {
-	const names = [...text.matchAll(/\/opsx:([a-z][a-z-]*)/g)].map((m) => m[1]);
-	const known = new Set([...reference.commands, ...reference.workflows]);
-	return [...new Set(names)].filter((n) => !known.has(n));
-}
-
-async function chatReference(page: Page): Promise<ChatReference> {
-	await page.goto(CHAT_REFERENCE);
-	return page.locator('main').evaluate((main) => {
-		const commands = [...(main.textContent ?? '').matchAll(/\/opsx:([a-z][a-z-]*)/g)].map((m) => m[1]);
-		const table = [...main.querySelectorAll('table')].find((t) => t.querySelector('th')?.textContent?.trim() === 'Workflow');
-		const workflows = [...(table?.querySelectorAll('tbody td:first-child code') ?? [])].map((c) => c.textContent?.trim() ?? '');
-		return { commands, workflows };
-	});
-}
-
-test.describe('landing: infografía', () => {
-	test.beforeEach(async ({ page }) => {
-		await page.goto('/');
-	});
-
-	test('Scenario: Infografía tras el bloque de tres frases', async ({ page }) => {
-		const figure = infographic(page);
-		await expect(figure).toHaveCount(1);
-		const before = page.locator('main h2', { hasText: 'Qué es OpenSpec en 3 frases' });
-		const after = page.locator('main h2', { hasText: 'El ciclo de trabajo' });
-		const follows = (a: Element, b: Element) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
-		const figureHandle = await figure.elementHandle();
-		expect(await before.evaluate(follows, figureHandle)).toBe(true);
-		expect(await figure.evaluate(follows, await after.elementHandle())).toBe(true);
-	});
-
-	test('Scenario: Contenido como texto y no como imagen', async ({ page }) => {
-		const figure = infographic(page);
-		await expect(figure.locator('img, picture, canvas, image')).toHaveCount(0);
-		for (const title of BLOCKS) {
-			await expect(figure.locator('h3', { hasText: title })).toBeVisible();
-		}
-	});
-
-	test('Scenario: Cuatro bloques en orden', async ({ page }) => {
-		const headings = await infographic(page).locator('h3').allTextContents();
-		expect(headings.map((h) => h.replace(/\s+/g, ' ').trim())).toEqual(BLOCKS.map((t, i) => `${i + 1} ${t}`));
-	});
-
-	test('Scenario: Cada bloque enlaza a una guía existente', async ({ page, request }) => {
-		const blocks = infographic(page).locator('[data-ig-block]');
-		await expect(blocks).toHaveCount(BLOCKS.length);
-		for (const block of await blocks.all()) {
-			const hrefs = await block.locator('a').evaluateAll((as) => as.map((a) => a.getAttribute('href') ?? ''));
-			expect(hrefs.length).toBeGreaterThan(0);
-			for (const href of hrefs) {
-				expect((await request.get(href)).status(), href).toBe(200);
-			}
-		}
-	});
-
-	test('Scenario: Comandos /opsx documentados', async ({ page }) => {
-		const text = (await infographic(page).textContent()) ?? '';
-		expect(text).toMatch(/\/opsx:/);
-		expect(undocumentedCommands(text, await chatReference(page))).toEqual([]);
-	});
-
-	test('Scenario: Comando inexistente detectado', async ({ page }) => {
-		const reference = await chatReference(page);
-		expect(reference.workflows).toContain('verify');
-		expect(undocumentedCommands('/opsx:apply y después /opsx:deploy', reference)).toEqual(['deploy']);
-	});
-
-	test('Scenario: Comando del perfil ampliado marcado', async ({ page }) => {
-		const step = infographic(page).locator('li', { has: page.locator('code', { hasText: '/opsx:verify' }) });
-		await expect(step).toHaveCount(1);
-		await expect(step).toContainText('perfil ampliado');
-	});
-
-	test('Scenario: Rutas y artefactos correctos', async ({ page }) => {
-		const text = (await infographic(page).textContent()) ?? '';
-		for (const expected of ['openspec/specs/', 'openspec/changes/', 'proposal.md', 'specs/', 'design.md', 'tasks.md']) {
-			expect(text).toContain(expected);
-		}
-	});
-
-	test('Scenario: Sin referencias a un stack concreto', async ({ page }) => {
-		const text = (await infographic(page).textContent()) ?? '';
-		expect(text).not.toContain('.NET');
-		expect(text).not.toContain('Angular');
-	});
-
-	test('Scenario: Sin desbordamiento horizontal a 360 px', async ({ page }) => {
-		await page.setViewportSize({ width: 360, height: 800 });
-		await page.goto('/');
-		await expect(infographic(page)).toBeVisible();
-		const { scroll, viewport } = await page.evaluate(() => ({
-			scroll: document.documentElement.scrollWidth,
-			viewport: document.documentElement.clientWidth,
-		}));
-		expect(scroll).toBeLessThanOrEqual(viewport);
-	});
-
-	test('Scenario: Iconos decorativos ocultos a tecnologías de apoyo', async ({ page }) => {
-		const icons = infographic(page).locator('svg');
-		expect(await icons.count()).toBeGreaterThan(0);
-		for (const icon of await icons.all()) {
-			await expect(icon).toHaveAttribute('aria-hidden', 'true');
-			await expect(icon).not.toHaveAttribute('aria-label');
-		}
-		await expect(infographic(page).locator('svg title')).toHaveCount(0);
 	});
 });

@@ -113,3 +113,30 @@ describe('contenido: skills complementarias', () => {
 		expect(issues[0]).toMatch(/to-spec.*Quizá/);
 	});
 });
+
+describe('contenido: campo commands', () => {
+	const withCommands = (commands: unknown) => ({ ...complete, commands });
+
+	test('Scenario: Lista de comandos válida', () => {
+		expect(validateGuideFrontmatter('guias/flujo-opsx', withCommands(['/opsx:propose', '/opsx:apply']))).toEqual([]);
+	});
+
+	test('Scenario: Comando con forma inválida', () => {
+		for (const bad of ['opsx:propose', '/opsx:Propose', '/opsx:', '/openspec:apply', '/opsx:apply now']) {
+			const issues = validateGuideFrontmatter('guias/flujo-opsx', withCommands(['/opsx:apply', bad]));
+			expect(issues.join('\n'), bad).toMatch(/guias\/flujo-opsx.*commands/);
+		}
+	});
+
+	test('Scenario: Comando repetido', () => {
+		const issues = validateGuideFrontmatter('guias/flujo-opsx', withCommands(['/opsx:apply', '/opsx:apply']));
+		expect(issues.join('\n')).toMatch(/commands.*repetidos/);
+	});
+
+	test('Scenario: Lista vacía o demasiado larga', () => {
+		const nine = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'].map((n) => `/opsx:${n}`);
+		expect(validateGuideFrontmatter('guias/flujo-opsx', withCommands([])).join('\n')).toMatch(/commands/);
+		expect(validateGuideFrontmatter('guias/flujo-opsx', withCommands(nine)).join('\n')).toMatch(/commands/);
+		expect(validateGuideFrontmatter('guias/flujo-opsx', withCommands(nine.slice(0, 8)))).toEqual([]);
+	});
+});

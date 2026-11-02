@@ -7,52 +7,152 @@
 @import '@fontsource/ibm-plex-mono/latin-500.css';
 @import '@fontsource/ibm-plex-mono/latin-600.css';
 
-/* Site color tokens: Starlight custom properties (dark theme is the default). */
+/*
+ * Site color tokens (w18, design.md D1) over Starlight's custom properties; dark is the default.
+ * Values mirror src/lib/design-tokens.ts, and tests/unit/contrast.test.ts keeps both in sync.
+ */
 :root {
-	--sl-color-accent-low: #102a2b;
-	--sl-color-accent: #0f8a85;
-	--sl-color-accent-high: #b8ece8;
-	--sl-color-white: #ffffff;
-	--sl-color-gray-1: #eceef2;
-	--sl-color-gray-2: #c0c2c7;
-	--sl-color-gray-3: #888b96;
-	--sl-color-gray-4: #545861;
-	--sl-color-gray-5: #353841;
-	--sl-color-gray-6: #24272f;
-	--sl-color-black: #17181c;
+	--sl-color-black: #121317;
+	--sl-color-white: #ECEDEF;
+	--sl-color-gray-1: #DADCE0;
+	--sl-color-gray-2: #C3C6CD;
+	--sl-color-gray-3: #A3A7B1;
+	--sl-color-gray-4: #6F737D;
+	--sl-color-gray-5: #3E424B;
+	--sl-color-gray-6: #2E3139;
+	--sl-color-gray-7: #1A1C21;
+	--sl-color-accent: #A5A9FF;
+	--sl-color-accent-high: #C7C9FF;
+	--sl-color-accent-low: #1E2150;
+	--os-surface: #1A1C21;
+	--os-border: #2E3139;
+	--os-band-bg: #1A1C21;
+	--os-band-text: #ECEDEF;
+	--os-band-muted: #A3A7B1;
+	--os-band-accent: #C7C9FF;
+	--os-tag-added-bg: #12301F;
+	--os-tag-added-text: #8FD4AE;
+	--os-tag-modified-bg: #33260F;
+	--os-tag-modified-text: #F0C67A;
+	--os-tag-removed-bg: #3A1612;
+	--os-tag-removed-text: #F4A69C;
+	--os-tag-renamed-bg: #1E2150;
+	--os-tag-renamed-text: #C3C6FF;
+	--os-radius: 0.5rem;
 	--sl-font: 'IBM Plex Sans', system-ui, sans-serif;
 	--sl-font-mono: 'IBM Plex Mono', ui-monospace, monospace;
-	--landing-bg: #111215;
-	--landing-surface: #17181c;
+	/* Header and sidebar share the page background; inline code sits on the border gray. */
+	--sl-color-bg-nav: var(--sl-color-black);
+	--sl-color-bg-sidebar: var(--sl-color-black);
+	--sl-color-bg-inline-code: var(--sl-color-gray-6);
 }
 
 :root[data-theme='light'] {
-	--sl-color-accent-low: #c6f0ec;
-	--sl-color-accent: #0b6d69;
-	--sl-color-accent-high: #0a3d3b;
-	--sl-color-white: #17181c;
-	--sl-color-gray-1: #24272f;
-	--sl-color-gray-2: #353841;
-	--sl-color-gray-3: #545861;
-	--sl-color-gray-4: #888b96;
-	--sl-color-gray-5: #c0c2c7;
-	--sl-color-gray-6: #eceef2;
-	--sl-color-gray-7: #f5f6f8;
-	--sl-color-black: #ffffff;
-	--landing-bg: #ffffff;
-	--landing-surface: #f5f6f8;
-}
-
-/* Landing background (pages with a hero only). */
-:root[data-has-hero] {
-	--sl-color-bg: var(--landing-bg);
+	--sl-color-black: #FAFAF7;
+	--sl-color-white: #16181D;
+	--sl-color-gray-1: #24262C;
+	--sl-color-gray-2: #3D414C;
+	--sl-color-gray-3: #5B5F69;
+	--sl-color-gray-4: #8A8D96;
+	--sl-color-gray-5: #D5D7CF;
+	--sl-color-gray-6: #E3E4DE;
+	--sl-color-gray-7: #FFFFFF;
+	--sl-color-accent: #3338C9;
+	--sl-color-accent-high: #1F2390;
+	--sl-color-accent-low: #EEEFF9;
+	--os-surface: #FFFFFF;
+	--os-border: #E3E4DE;
+	--os-band-bg: #16181D;
+	--os-band-text: #FAFAF7;
+	--os-band-muted: #9EA2AD;
+	--os-band-accent: #C7C9FF;
+	--os-tag-added-bg: #EEF7F1;
+	--os-tag-added-text: #17603C;
+	--os-tag-modified-bg: #FBF3E6;
+	--os-tag-modified-text: #7A4800;
+	--os-tag-removed-bg: #FCEEEC;
+	--os-tag-removed-text: #9B1C12;
+	--os-tag-renamed-bg: #EEEFF9;
+	--os-tag-renamed-text: #2A2E9E;
+	--sl-color-bg-nav: var(--sl-color-black);
+	--sl-color-bg-sidebar: var(--sl-color-black);
+	--sl-color-bg-inline-code: var(--sl-color-gray-6);
 }
 
 /* Native header, CSS only (no Header override). */
 header.header {
-	border-bottom: 1px solid var(--sl-color-gray-6);
+	border-bottom: 1px solid var(--os-border);
 }
 header.header site-search button {
 	font-family: var(--sl-font-mono);
 	font-size: var(--sl-text-xs);
+}
+
+/*
+ * Sidebar (D5): the first five groups get a two-digit visual prefix. Literal strings rather than
+ * CSS counters, so the computed `content` is the number shown. The alternative text after the
+ * slash is empty, so the prefix stays out of the accessible name.
+ */
+#starlight__sidebar ul.top-level > li:nth-child(-n + 5) > details > summary .group-label::before {
+	font-family: var(--sl-font-mono);
+	font-size: var(--sl-text-xs);
+	color: var(--sl-color-gray-3);
+}
+#starlight__sidebar ul.top-level > li:nth-child(1) > details > summary .group-label::before {
+	content: '01 · ' / '';
+}
+#starlight__sidebar ul.top-level > li:nth-child(2) > details > summary .group-label::before {
+	content: '02 · ' / '';
+}
+#starlight__sidebar ul.top-level > li:nth-child(3) > details > summary .group-label::before {
+	content: '03 · ' / '';
+}
+#starlight__sidebar ul.top-level > li:nth-child(4) > details > summary .group-label::before {
+	content: '04 · ' / '';
+}
+#starlight__sidebar ul.top-level > li:nth-child(5) > details > summary .group-label::before {
+	content: '05 · ' / '';
+}
+
+/* Previous/next pagination as cards (D6), CSS only over Starlight's markup. */
+.pagination-links a {
+	border: 1px solid var(--os-border);
+	border-radius: var(--os-radius);
+	background: var(--os-surface);
+	box-shadow: none;
+	color: var(--sl-color-gray-3);
+}
+.pagination-links a:hover,
+.pagination-links a:focus-visible {
+	border-color: var(--sl-color-accent);
+}
+.pagination-links .link-title {
+	color: var(--sl-color-white);
+	font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation: none !important;
+		transition: none !important;
+	}
+}
+
+/* Home sections (w18): shared spacing and heading, one <section> per block. */
+.home-seccion {
+	margin-block: 3.5rem 0;
+}
+.home-seccion > h2 {
+	margin: 0 0 1.25rem;
+	font-size: var(--sl-text-h3);
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	color: var(--sl-color-white);
+}
+.home-seccion .seccion-intro {
+	margin: -0.5rem 0 1.25rem;
+	max-width: 40rem;
+	color: var(--sl-color-gray-2);
 }

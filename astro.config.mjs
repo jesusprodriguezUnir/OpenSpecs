@@ -22,6 +22,7 @@ export default defineConfig({
 				Hero: "./src/components/overrides/Hero.astro",
 					PageTitle: "./src/components/overrides/PageTitle.astro",
 				Footer: "./src/components/overrides/Footer.astro",
+				PageSidebar: "./src/components/overrides/PageSidebar.astro",
 			},
 			// Vercel Web Analytics, same origin and cookieless (w11).
 			head: [

@@ -1,0 +1,24 @@
+---
+import Default from '@astrojs/starlight/components/PageSidebar.astro';
+import ComandosPagina from '../ComandosPagina.astro';
+
+// Right column (ADR-0002): Starlight's table of contents, then the «Comandos de esta página» box.
+// The column only exists from `lg` up; below it, PageTitle renders the same box in the content.
+const { entry, toc } = Astro.locals.starlightRoute;
+const { commands } = entry.data;
+---
+
+<Default />
+{
+	toc && commands && (
+		<div class="comandos-columna sl-hidden lg:sl-block">
+			<ComandosPagina commands={commands} />
+		</div>
+	)
+}
+
+<style>
+	.comandos-columna {
+		padding: 0 var(--sl-sidebar-pad-x) 1rem;
+	}
+</style>

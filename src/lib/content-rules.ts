@@ -13,6 +13,10 @@ export type GuideLevel = (typeof GUIDE_LEVELS)[number];
 const GUIDE_SECTIONS: readonly string[] = ['empieza', 'guias', 'agentes', 'equipo'];
 const REFERENCE_SECTION = 'referencia';
 
+/** Shape of a declared chat command: `/opsx:` plus a lowercase name with letters and hyphens. */
+export const COMMAND_PATTERN = /^\/opsx:[a-z][a-z-]*$/;
+export const COMMANDS_MAX = 8;
+
 /** Schema extension for the `docs` collection. Fields are optional here; section rules live in `requiredFieldsFor`. */
 export const guideMetadataSchema = z.object({
 	openspecVersion: z
@@ -22,6 +26,13 @@ export const guideMetadataSchema = z.object({
 	lastReviewed: z.coerce.date().optional(),
 	level: z.enum(GUIDE_LEVELS).optional(),
 	duration: z.number().int().positive().optional(),
+	/** Chat commands shown in the «Comandos de esta página» box (w18), in display order. */
+	commands: z
+		.array(z.string().regex(COMMAND_PATTERN, 'cada comando debe tener la forma /opsx:<nombre>'))
+		.min(1, 'commands debe tener al menos un comando')
+		.max(COMMANDS_MAX, `commands admite como máximo ${COMMANDS_MAX} comandos`)
+		.refine((list) => new Set(list).size === list.length, 'commands no admite comandos repetidos')
+		.optional(),
 });
 
 export type GuideMetadata = z.infer<typeof guideMetadataSchema>;
