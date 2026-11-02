@@ -1,0 +1,75 @@
+---
+import { MANUAL_PDF_PATH, MANUAL_PDF_SIZE } from '../../config/manual.mjs';
+
+// «Para llevártelo» (w18): the downloadable manual, external resources and how this site was built.
+type Item = { href: string; title: string; desc: string; meta?: string; download?: boolean };
+
+const items: Item[] = [
+	{
+		href: MANUAL_PDF_PATH,
+		title: 'Manual en PDF',
+		meta: MANUAL_PDF_SIZE,
+		desc: 'Todo el sitio maquetado como libro, para leer sin conexión.',
+		download: true,
+	},
+	{ href: '/recursos/', title: 'Recursos', desc: 'Documentación oficial, artículos y vídeos de la comunidad.' },
+	{ href: '/como-se-hizo/', title: 'Cómo se hizo', desc: 'Los changes reales con los que se ha construido esta web.' },
+];
+---
+
+<section class="home-seccion not-content" aria-labelledby="para-llevartelo">
+	<h2 id="para-llevartelo">Para llevártelo</h2>
+	<ul class="items">
+		{
+			items.map((i) => (
+				<li>
+					<a href={i.href} download={i.download}>
+						{i.title}
+						{i.meta && <span class="meta"> · {i.meta}</span>}
+					</a>
+					<span class="desc">{i.desc}</span>
+				</li>
+			))
+		}
+	</ul>
+</section>
+
+<style>
+	.items {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		gap: 1rem;
+		margin: 0 0 2rem;
+		padding: 0;
+		list-style: none;
+	}
+	li {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		margin: 0;
+		padding: 1.1rem 1.25rem;
+		border: 1px solid var(--os-border);
+		border-radius: var(--os-radius);
+		background: var(--os-surface);
+	}
+	a {
+		font-weight: 600;
+	}
+	.meta {
+		font-family: var(--sl-font-mono);
+		font-size: var(--sl-text-xs);
+		font-weight: 400;
+		color: var(--sl-color-gray-3);
+	}
+	.desc {
+		font-size: var(--sl-text-sm);
+		line-height: 1.5;
+		color: var(--sl-color-gray-2);
+	}
+	@media (min-width: 50rem) {
+		.items {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+	}
+</style>

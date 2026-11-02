@@ -1,10 +1,26 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { expectNoSevereViolations } from './axe';
 
 test.describe('accesibilidad', () => {
 	test('Scenario: Una página de guía sin violaciones graves de accesibilidad', async ({ page }) => {
 		await page.goto('/empieza/que-es/');
 		await expectNoSevereViolations(page);
+	});
+
+	const guideInTheme = async (page: Page, theme: 'light' | 'dark') => {
+		await page.emulateMedia({ colorScheme: theme });
+		await page.goto('/empieza/que-es/');
+		await page.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme);
+		await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+		await expectNoSevereViolations(page);
+	};
+
+	test('Scenario: Página de guía en tema claro sin violaciones graves', async ({ page }) => {
+		await guideInTheme(page, 'light');
+	});
+
+	test('Scenario: Página de guía en tema oscuro sin violaciones graves', async ({ page }) => {
+		await guideInTheme(page, 'dark');
 	});
 
 	test('Scenario: La landing sin violaciones graves de accesibilidad', async ({ page }) => {

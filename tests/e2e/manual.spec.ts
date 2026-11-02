@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { executableScripts, scriptExtras, type ScriptRef } from './script-budget';
 import { siteMapSlugs } from './site-map';
+import { chatReference, undocumentedCommands } from './opsx-commands';
 
 const SIDEBAR = '#starlight__sidebar';
 const PDF = '/manual-openspec.pdf';
@@ -156,7 +157,7 @@ test.describe('contenido: manual en PDF', () => {
 
 	test('Scenario: Enlace de descarga en la landing', async ({ page }) => {
 		await page.goto('/');
-		const link = page.locator(`main a[href="${PDF}"]`);
+		const link = page.locator(`.hero a[href="${PDF}"]`);
 		await expect(link).toHaveCount(1);
 		await expect(link).toHaveAttribute('download', '');
 		await expect(link).toContainText('Manual en PDF');
@@ -219,5 +220,50 @@ test.describe('contenido: colofón del manual', () => {
 				lis.filter((li) => (li.querySelector('.num')?.textContent ?? '').trim() !== '').map((li) => li.querySelector('a')?.getAttribute('href')),
 			);
 		expect(numbered).not.toContain('#colofon');
+	});
+});
+
+const MANUAL_INFOGRAPHIC = 'OpenSpec: desarrollo guiado por especificaciones con IA';
+
+const manualInfographic = (page: Page) =>
+	page.locator('[data-manual-infografia]').getByRole('figure', { name: MANUAL_INFOGRAPHIC });
+
+async function manualInfographicText(page: Page): Promise<string> {
+	await page.goto('/manual/');
+	return (await manualInfographic(page).textContent()) ?? '';
+}
+
+test.describe('manual: infografía fiel a OpenSpec', () => {
+	test('Scenario: Comandos /opsx del manual documentados', async ({ page }) => {
+		const text = await manualInfographicText(page);
+		expect(text).toMatch(/\/opsx:/);
+		expect(undocumentedCommands(text, await chatReference(page))).toEqual([]);
+	});
+
+	test('Scenario: Comando inexistente en el manual detectado', async ({ page }) => {
+		const text = await manualInfographicText(page);
+		const reference = await chatReference(page);
+		expect(reference.workflows).toContain('verify');
+		expect(undocumentedCommands(`${text} /opsx:deploy`, reference)).toEqual(['deploy']);
+	});
+
+	test('Scenario: Comando del perfil ampliado marcado en el manual', async ({ page }) => {
+		await page.goto('/manual/');
+		const step = manualInfographic(page).locator('li', { has: page.locator('code', { hasText: '/opsx:verify' }) });
+		await expect(step).toHaveCount(1);
+		await expect(step).toContainText('perfil ampliado');
+	});
+
+	test('Scenario: Rutas y artefactos correctos en el manual', async ({ page }) => {
+		const text = await manualInfographicText(page);
+		for (const expected of ['openspec/specs/', 'openspec/changes/', 'proposal.md', 'specs/', 'design.md', 'tasks.md']) {
+			expect(text).toContain(expected);
+		}
+	});
+
+	test('Scenario: Manual sin referencias a un stack concreto', async ({ page }) => {
+		const text = await manualInfographicText(page);
+		expect(text).not.toContain('.NET');
+		expect(text).not.toContain('Angular');
 	});
 });

@@ -1,0 +1,59 @@
+---
+// «Comandos de esta página» box (w18, design.md D8): the page's declared `commands`, in order.
+// Rendered from two places (PageSidebar on wide screens, PageTitle below `lg`); the `class` prop
+// decides which viewport shows each copy, so only one region is visible at a time.
+interface Props {
+	commands: readonly string[];
+	class?: string;
+}
+
+const { commands, class: className } = Astro.props;
+---
+
+<aside class:list={['comandos-pagina', className]} aria-label="Comandos de esta página" data-page-commands>
+	<p class="titulo" aria-hidden="true">Comandos de esta página</p>
+	<ul>
+		{
+			commands.map((command) => (
+				<li>
+					<code>{command}</code>
+				</li>
+			))
+		}
+	</ul>
+	<a href="/referencia/comandos-chat/">Referencia de comandos de chat</a>
+</aside>
+
+<style>
+	.comandos-pagina {
+		margin-top: 1rem;
+		padding: 0.9rem 1rem;
+		border: 1px solid var(--os-border);
+		border-radius: var(--os-radius);
+		background: var(--os-surface);
+		font-size: var(--sl-text-xs);
+	}
+	.titulo {
+		margin: 0 0 0.5rem;
+		font-size: var(--sl-text-sm);
+		font-weight: 600;
+		color: var(--sl-color-white);
+	}
+	ul {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		margin: 0 0 0.6rem;
+		padding: 0;
+		list-style: none;
+	}
+	li {
+		margin: 0;
+	}
+	code {
+		font-size: var(--sl-text-xs);
+	}
+	a {
+		color: var(--sl-color-text-accent);
+	}
+</style>

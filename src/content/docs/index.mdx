@@ -3,35 +3,29 @@ title: OpenSpec desde cero
 description: Aprende a usar OpenSpec paso a paso, desde la instalación hasta tu primer cambio.
 template: splash
 hero:
-  tagline: Desarrollo guiado por especificaciones, explicado desde cero. Acuerda qué vas a construir antes de pedírselo a tu agente de IA.
+  title: Acuerda qué construir antes de pedírselo a tu agente.
+  tagline: Desarrollo guiado por especificaciones con OpenSpec, explicado desde cero. Tú y tu agente de IA acordáis requisitos y escenarios, y la spec queda como documentación viva del proyecto.
   actions:
-    - text: Empieza en 30 minutos
+    - text: Tu primer cambio en 30 minutos
       link: /empieza/primer-cambio/
-      icon: right-arrow
       variant: primary
     - text: Qué es OpenSpec
       link: /empieza/que-es/
       variant: minimal
 ---
 
-import CicloPasos from '../../components/CicloPasos.astro';
-import InfografiaSdd from '../../components/InfografiaSdd.astro';
+import CicloChange from '../../components/home/CicloChange.astro';
+import DosCarpetas from '../../components/home/DosCarpetas.astro';
+import EnEquipo from '../../components/home/EnEquipo.astro';
+import ParaLlevartelo from '../../components/home/ParaLlevartelo.astro';
 import Recorridos from '../../components/Recorridos.astro';
 
-## Qué es OpenSpec en 3 frases
-
-1. OpenSpec es una herramienta de línea de comandos para escribir especificaciones ligeras antes de programar con un agente de IA.
-2. Cada cambio empieza como una propuesta con requisitos y escenarios que tú y el agente revisáis juntos.
-3. Al terminar, esas especificaciones se fusionan con las del proyecto y quedan como documentación viva.
-
-## El método de un vistazo
-
-<InfografiaSdd />
-
-## El ciclo de trabajo
-
-<CicloPasos />
-
-## Elige tu recorrido
-
 <Recorridos />
+
+<CicloChange />
+
+<DosCarpetas />
+
+<EnEquipo />
+
+<ParaLlevartelo />

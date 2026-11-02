@@ -1,0 +1,129 @@
+---
+// «Two folders» mental model (w18): changes in flight, archived changes and the source of truth.
+const carpetas = [
+	{ path: 'openspec/changes/', desc: 'Changes en curso: propuesta, delta specs, diseño y tareas.' },
+	{ path: 'openspec/changes/archive/', desc: 'Changes cerrados, con su historia intacta.' },
+	{ path: 'openspec/specs/', desc: 'La fuente de verdad: el comportamiento acordado del sistema.' },
+];
+const tags = [
+	{ name: 'ADDED', kind: 'added', desc: 'requisito nuevo' },
+	{ name: 'MODIFIED', kind: 'modified', desc: 'requisito que cambia' },
+	{ name: 'REMOVED', kind: 'removed', desc: 'requisito que se retira' },
+	{ name: 'RENAMED', kind: 'renamed', desc: 'requisito con otro nombre' },
+];
+---
+
+<section class="home-seccion not-content" aria-labelledby="dos-carpetas">
+	<h2 id="dos-carpetas">Dos carpetas, un modelo mental</h2>
+	<p class="seccion-intro">
+		Cada change vive en su carpeta mientras se trabaja; al archivarlo, sus deltas se fusionan con las specs
+		del proyecto.
+	</p>
+	<div class="carpetas">
+		<ul class="lista">
+			{
+				carpetas.map((c) => (
+					<li>
+						<code>{c.path}</code>
+						<span>{c.desc}</span>
+					</li>
+				))
+			}
+		</ul>
+		<svg class="flecha" aria-hidden="true" focusable="false" viewBox="0 0 48 24" width="48" height="24">
+			<path d="M2 12h40m-8-8 8 8-8 8" fill="none" stroke="currentColor" stroke-width="2"></path>
+		</svg>
+		<ul class="etiquetas">
+			{
+				tags.map((t) => (
+					<li>
+						<span class:list={['tag', t.kind]}>{t.name}</span>
+						<span>{t.desc}</span>
+					</li>
+				))
+			}
+		</ul>
+	</div>
+	<p class="mas"><a href="/empieza/conceptos/">Conceptos: specs, changes y deltas</a></p>
+</section>
+
+<style>
+	.carpetas {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		align-items: center;
+		gap: 1rem;
+		padding: 1.25rem;
+		border: 1px solid var(--os-border);
+		border-radius: var(--os-radius);
+		background: var(--os-surface);
+	}
+	ul {
+		display: grid;
+		gap: 0.75rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	li {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		margin: 0;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+	}
+	.lista code {
+		align-self: flex-start;
+		overflow-wrap: anywhere;
+	}
+	.etiquetas li {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.6rem;
+	}
+	.tag {
+		min-width: 6.5rem;
+		padding: 0.15rem 0.5rem;
+		border-radius: 0.3rem;
+		font-family: var(--sl-font-mono);
+		font-size: var(--sl-text-xs);
+		font-weight: 600;
+		text-align: center;
+	}
+	.added {
+		background: var(--os-tag-added-bg);
+		color: var(--os-tag-added-text);
+	}
+	.modified {
+		background: var(--os-tag-modified-bg);
+		color: var(--os-tag-modified-text);
+	}
+	.removed {
+		background: var(--os-tag-removed-bg);
+		color: var(--os-tag-removed-text);
+	}
+	.renamed {
+		background: var(--os-tag-renamed-bg);
+		color: var(--os-tag-renamed-text);
+	}
+	.flecha {
+		justify-self: center;
+		color: var(--sl-color-gray-3);
+		transform: rotate(90deg);
+	}
+	.mas {
+		margin: 1rem 0 0;
+		font-size: var(--sl-text-sm);
+	}
+	@media (min-width: 50rem) {
+		.carpetas {
+			grid-template-columns: minmax(0, 1.3fr) auto minmax(0, 1fr);
+			gap: 1.5rem;
+		}
+		.flecha {
+			transform: none;
+		}
+	}
+</style>
